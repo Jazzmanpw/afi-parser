@@ -1,4 +1,4 @@
-const { name, textTemplate } = require('./syntaxParsers');
+const { name, regTemplate, textTemplate } = require('./syntaxParsers');
 
 describe('name', () => {
   test('match a name starting with a letter', () => {
@@ -65,5 +65,31 @@ describe('textTemplate', () => {
 
   test('if template is not closed with the second quote, return null match', () => {
     expect(textTemplate("'not closed")[0]).toBe(null);
+  });
+});
+
+describe('regTemplate', () => {
+  test('text in slashes parsed into `type: reg`', () => {
+    expect(regTemplate('/(some|any)? ?regex/')[0].type).toBe('reg');
+  });
+
+  test('text in slashes returns string between them as match.value', () => {
+    expect(regTemplate('/(some|any)? ?regex/')[0].value).toBe('(some|any)? ?regex');
+  });
+
+  test('regex escaping with backslash', () => {
+    expect(regTemplate('/reg w\\/slash&\\$ymbols\\./')[0].value).toBe('reg w\\/slash&\\$ymbols\\.');
+  });
+
+  test('positive position incremented to be after the last slash', () => {
+    expect(regTemplate('regular: /expressions?/', 9)[1]).toBe(23);
+  });
+
+  test('empty reg template is not parser', () => {
+    expect(regTemplate('//')[0]).toBe(null);
+  });
+
+  test('tf template is not closed with the second slash, return null match', () => {
+    expect(regTemplate('/close me')[0]).toBe(null);
   });
 });

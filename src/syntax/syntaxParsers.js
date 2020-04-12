@@ -21,3 +21,13 @@ export function textTemplate(source: string, pos: number = 0): ParserResultType<
   }
   return [null, pos];
 }
+
+const slash = text('/');
+const regTemplateParser = seq(slash, reg('(\\\\.|[^/\\\\])+'), slash);
+export function regTemplate(source: string, pos: number = 0): ParserResultType<{ type: 'reg', value: string }> {
+  const [result, newPos] = regTemplateParser(source, pos);
+  if (result) {
+    return [{ type: 'reg', value: result[1] }, newPos];
+  }
+  return [null, pos];
+}
