@@ -1,4 +1,4 @@
-const { name, regTemplate, seqTemplate, textTemplate, unionTemplate } = require('./syntaxParsers');
+const { default: rule, name, regTemplate, seqTemplate, textTemplate, unionTemplate } = require('./syntaxParsers');
 
 describe('name', () => {
   test('match a name starting with a letter', () => {
@@ -187,3 +187,30 @@ describe('unionTemplate', () => {
     expect(unionTemplate("union: /reg(ex)?/ | 'regular expression'", 7)[1]).toBe(40);
   });
 })
+
+describe('rule', () => {
+  test('return parsed name as rule.name', () => {
+    expect(rule("ruleName: 'simple rule'")[0].name).toBe('ruleName');
+  });
+
+  test('return parsed expression AST as rule.expression', () => {
+    expect(rule("ruleName: 'rule' /\\s+/ 'expression' | 'ruleExpression'")[0].expression).toEqual({
+      type: 'union',
+      value: [
+        { type: 'seq', value: [
+          { type: 'text', value: 'rule' },
+          { type: 'seq', value: [{ type: 'reg', value: '\\s+' }, { type: 'text', value: 'expression' }] },
+        ] },
+        { type: 'text', value: 'ruleExpression' },
+      ],
+    });
+  });
+
+  test('if name parsing fails, return null match', () => {
+    expect(rule('na me: /reg/')[0]).toBe(null);
+  });
+
+  test('if one of templates fails, return null match', () => {
+    expect(rule('broken: /close me')[0]).toBe(null);
+  });
+});

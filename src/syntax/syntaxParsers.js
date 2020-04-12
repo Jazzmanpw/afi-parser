@@ -2,7 +2,7 @@
 import { reg, seq, text, union } from '../basicParsers';
 
 import type { ParserResultType } from '../basicParsers';
-import type { RegResultType, SeqResultType, TextResultType, UnionResultType } from './types';
+import type { RegResultType, RuleResultType, SeqResultType, TextResultType, UnionResultType } from './types';
 
 const nameParser = seq(reg('[_a-zA-Z]\\w+'), reg(':\\s*'));
 export function name(source: string, pos: number = 0): ParserResultType<string> {
@@ -34,11 +34,9 @@ export function regTemplate(source: string, pos: number = 0): ParserResultType<R
 }
 
 const spaces = reg(/\s+/);
-const seqTemplateParser = seq(
-  union(textTemplate, regTemplate),
-  spaces,
-  union(seqTemplate, textTemplate, regTemplate),
-);
+const atomicTemplate = union(textTemplate, regTemplate);
+const seqItemTemplate = union(seqTemplate, textTemplate, regTemplate);
+const seqTemplateParser = seq(atomicTemplate, spaces, seqItemTemplate);
 export function seqTemplate(source: string, pos: number = 0): ParserResultType<SeqResultType> {
   const [result, newPos] = seqTemplateParser(source, pos);
   if (result) {
@@ -48,15 +46,21 @@ export function seqTemplate(source: string, pos: number = 0): ParserResultType<S
 }
 
 const or = reg('\\s*\\|\\s*');
-const unionTemplateParser = seq(
-  union(seqTemplate, textTemplate, regTemplate),
-  or,
-  union(unionTemplate, seqTemplate, textTemplate, regTemplate),
-);
+const unionItemTemplate = union(unionTemplate, seqTemplate, textTemplate, regTemplate);
+const unionTemplateParser = seq(seqItemTemplate, or, unionItemTemplate);
 export function unionTemplate(source: string, pos: number = 0): ParserResultType<UnionResultType> {
   const [result, newPos] = unionTemplateParser(source, pos);
   if (result) {
     return [{ type: 'union', value: [result[0], result[2]] }, newPos];
+  }
+  return [null, pos];
+}
+
+const ruleParser = seq(name, unionItemTemplate);
+export default function rule(source: string, pos: number = 0): ParserResultType<RuleResultType> {
+  const [result, newPos] = ruleParser(source, pos);
+  if (result) {
+    return [{ name: result[0], expression: result[1] }, newPos];
   }
   return [null, pos];
 }
