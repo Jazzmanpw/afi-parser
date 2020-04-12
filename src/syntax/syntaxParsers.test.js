@@ -43,7 +43,7 @@ describe('name', () => {
 });
 
 describe('textTemplate', () => {
-  test('text in single quotes parsed into `type: text` and value that is in quotes', () => {
+  test('text in single quotes parsed into `type: text`', () => {
     expect(textTemplate("'some template'")[0].type).toBe('text');
   });
 
