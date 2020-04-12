@@ -1,4 +1,4 @@
-const { name } = require('./syntaxParsers');
+const { name, textTemplate } = require('./syntaxParsers');
 
 describe('name', () => {
   test('match a name starting with a letter', () => {
@@ -39,5 +39,31 @@ describe('name', () => {
 
   test('don\'t match a name with a missing semicolon', () => {
     expect(name('noname')[0]).toBe(null);
+  });
+});
+
+describe('textTemplate', () => {
+  test('text in single quotes parsed into `type: text` and value that is in quotes', () => {
+    expect(textTemplate("'some template'")[0].type).toBe('text');
+  });
+
+  test('text in single quotes returns string in the quotes as match.value', () => {
+    expect(textTemplate("'template'")[0].value).toBe('template');
+  });
+
+  test('quotes escaped with backslash', () => {
+    expect(textTemplate("'\\'quoted\\''")[0].value).toBe("\\'quoted\\'");
+  });
+
+  test('positive position incremented to be after the last quote', () => {
+    expect(textTemplate("name: 'template'", 6)[1]).toBe(16);
+  });
+
+  test('empty text template is not parsed', () => {
+    expect(textTemplate("''")[0]).toBe(null);
+  });
+
+  test('if template is not closed with the second quote, return null match', () => {
+    expect(textTemplate("'not closed")[0]).toBe(null);
   });
 });
