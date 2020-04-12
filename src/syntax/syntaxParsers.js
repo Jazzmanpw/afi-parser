@@ -4,10 +4,10 @@ import { reg, seq, text, union } from '../basicParsers';
 import type { ParserResultType } from '../basicParsers';
 import type { RegResultType, SeqResultType, TextResultType } from './types';
 
-const nameParser = seq(reg('[_a-zA-Z]\\w+'), text(':'));
+const nameParser = seq(reg('[_a-zA-Z]\\w+'), reg(':\\s*'));
 export function name(source: string, pos: number = 0): ParserResultType<string> {
   const [result, newPos] = nameParser(source, pos);
-  if (result && typeof result[0] === 'string') {
+  if (result) {
     return [result[0], newPos];
   }
   return [null, pos];

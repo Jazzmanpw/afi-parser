@@ -24,9 +24,8 @@ describe('name', () => {
   test('match name on positive position', () => {
     expect(name('prefix^name:', 7)[0]).toBe('name');
   });
-
-  test('set position after the semicolon', () => {
-    expect(name('valid_name: some value')[1]).toBe(11);
+  test('set position after the trailing spaces after the semicolon', () => {
+    expect(name('valid_name:   some value')[1]).toBe(14);
   });
 
   test('don\'t match a name starting with a number', () => {
@@ -89,7 +88,7 @@ describe('regTemplate', () => {
     expect(regTemplate('//')[0]).toBe(null);
   });
 
-  test('tf template is not closed with the second slash, return null match', () => {
+  test('if template is not closed with the second slash, return null match', () => {
     expect(regTemplate('/close me')[0]).toBe(null);
   });
 });
