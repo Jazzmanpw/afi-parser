@@ -2,7 +2,7 @@
 import { reg, seq, text, union } from '../basicParsers';
 
 import type { ParserResultType } from '../basicParsers';
-import type { RegResultType, SeqResultType, TextResultType } from './types';
+import type { RegResultType, SeqResultType, TextResultType, UnionResultType } from './types';
 
 const nameParser = seq(reg('[_a-zA-Z]\\w+'), reg(':\\s*'));
 export function name(source: string, pos: number = 0): ParserResultType<string> {
@@ -34,13 +34,29 @@ export function regTemplate(source: string, pos: number = 0): ParserResultType<R
 }
 
 const spaces = reg(/\s+/);
-const atomicTemplateParser = union(textTemplate, regTemplate);
-const expressionParser = union(seqTemplate, textTemplate, regTemplate)
-const seqTemplateParser = seq(atomicTemplateParser, spaces, expressionParser);
+const seqTemplateParser = seq(
+  union(textTemplate, regTemplate),
+  spaces,
+  union(seqTemplate, textTemplate, regTemplate),
+);
 export function seqTemplate(source: string, pos: number = 0): ParserResultType<SeqResultType> {
   const [result, newPos] = seqTemplateParser(source, pos);
   if (result) {
-    return [{ type: 'seq', value: [result[0], result[2]]}, newPos]
+    return [{ type: 'seq', value: [result[0], result[2]] }, newPos]
+  }
+  return [null, pos];
+}
+
+const or = reg('\\s*\\|\\s*');
+const unionTemplateParser = seq(
+  union(seqTemplate, textTemplate, regTemplate),
+  or,
+  union(unionTemplate, seqTemplate, textTemplate, regTemplate),
+);
+export function unionTemplate(source: string, pos: number = 0): ParserResultType<UnionResultType> {
+  const [result, newPos] = unionTemplateParser(source, pos);
+  if (result) {
+    return [{ type: 'union', value: [result[0], result[2]] }, newPos];
   }
   return [null, pos];
 }

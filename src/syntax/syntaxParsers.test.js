@@ -1,4 +1,4 @@
-const { name, regTemplate, seqTemplate, textTemplate } = require('./syntaxParsers');
+const { name, regTemplate, seqTemplate, textTemplate, unionTemplate } = require('./syntaxParsers');
 
 describe('name', () => {
   test('match a name starting with a letter', () => {
@@ -144,3 +144,46 @@ describe('seqTemplate', () => {
     expect(seqTemplate("'cannot''parse'")[0]).toBe(null);
   });
 });
+
+describe('unionTemplate', () => {
+  test('if atomic templates joined with pipe, return `type: union`', () => {
+    expect(unionTemplate("'this'|'that'")[0].type).toBe('union');
+  });
+
+  test('if binary union found, return array of syntax results as match.value', () => {
+    expect(unionTemplate("'this'|'that'")[0].value).toEqual([
+      { type: 'text', value: 'this' },
+      { type: 'text', value: 'that' },
+    ]);
+  });
+
+  test('if ternary union found, return it as nested binary unions', () => {
+    expect(unionTemplate("'parse'|'translate'|/read/")[0]).toEqual({
+      type: 'union',
+      value: [
+        { type: 'text', value: 'parse' },
+        {
+          type: 'union',
+          value: [
+            { type: 'text', value: 'translate' },
+            { type: 'reg', value: 'read' },
+          ],
+        },
+      ],
+    });
+  });
+
+  test('optional spaces around pipe are allowed', () => {
+    expect(unionTemplate("'connecting'  |   'people'")[0]).toEqual({
+      type: 'union',
+      value: [
+        { type: 'text', value: 'connecting' },
+        { type: 'text', value: 'people' },
+      ],
+    });
+  });
+
+  test('positive position incremented to be after the last child template', () => {
+    expect(unionTemplate("union: /reg(ex)?/ | 'regular expression'", 7)[1]).toBe(40);
+  });
+})
