@@ -1,4 +1,4 @@
-const { name, regTemplate, textTemplate } = require('./syntaxParsers');
+const { name, regTemplate, seqTemplate, textTemplate } = require('./syntaxParsers');
 
 describe('name', () => {
   test('match a name starting with a letter', () => {
@@ -91,5 +91,57 @@ describe('regTemplate', () => {
 
   test('tf template is not closed with the second slash, return null match', () => {
     expect(regTemplate('/close me')[0]).toBe(null);
+  });
+});
+
+describe('seqTemplate', () => {
+  test('if atomic templates joined with spaces found, return `type: seq`', () => {
+    const result = seqTemplate("'parse' 'it'");
+    expect(result[0].type).toBe('seq');
+  });
+
+  test('if binary sequence found, return array of syntax results as match.value', () => {
+    const result = seqTemplate("'Parse' 'It'");
+    expect(result[0].value).toEqual([
+      { type: 'text', value: 'Parse' },
+      { type: 'text', value: 'It' },
+    ]);
+  });
+
+  test('if ternary sequence found, return it as nested binary sequences', () => {
+    const result = seqTemplate("'we ' /go(nna|ing to) / 'parse'");
+    expect(result[0]).toEqual({
+      type: 'seq',
+      value: [
+        { type: 'text', value: 'we ' },
+        {
+          type: 'seq',
+          value: [
+            { type: 'reg', value: 'go(nna|ing to) ' },
+            { type: 'text', value: 'parse' },
+          ]
+        }
+      ]
+    });
+  })
+
+  test('multiple spaces are allowed', () => {
+    const result = seqTemplate("'many'   'spaces'");
+    expect(result[0]).toEqual({
+      type: 'seq',
+      value: [
+        { type: 'text', value: 'many' },
+        { type: 'text', value: 'spaces' },
+      ],
+    });
+  });
+
+  test('positive position incremented to be after the last child template', () => {
+    const result = seqTemplate("key: 'sequential' /parser/", 5);
+    expect(result[1]).toBe(26);
+  });
+
+  test('zero-spaces separator is not allowed', () => {
+    expect(seqTemplate("'cannot''parse'")[0]).toBe(null);
   });
 });

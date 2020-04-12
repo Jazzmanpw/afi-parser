@@ -1,8 +1,8 @@
 // @flow
-import { reg, seq, text } from '../basicParsers';
+import { reg, seq, text, union } from '../basicParsers';
 
 import type { ParserResultType } from '../basicParsers';
-import type { RegResultType, TextResultType } from './types';
+import type { RegResultType, SeqResultType, TextResultType } from './types';
 
 const nameParser = seq(reg('[_a-zA-Z]\\w+'), text(':'));
 export function name(source: string, pos: number = 0): ParserResultType<string> {
@@ -29,6 +29,18 @@ export function regTemplate(source: string, pos: number = 0): ParserResultType<R
   const [result, newPos] = regTemplateParser(source, pos);
   if (result) {
     return [{ type: 'reg', value: result[1] }, newPos];
+  }
+  return [null, pos];
+}
+
+const spaces = reg(/\s+/);
+const atomicTemplateParser = union(textTemplate, regTemplate);
+const expressionParser = union(seqTemplate, textTemplate, regTemplate)
+const seqTemplateParser = seq(atomicTemplateParser, spaces, expressionParser);
+export function seqTemplate(source: string, pos: number = 0): ParserResultType<SeqResultType> {
+  const [result, newPos] = seqTemplateParser(source, pos);
+  if (result) {
+    return [{ type: 'seq', value: [result[0], result[2]]}, newPos]
   }
   return [null, pos];
 }
