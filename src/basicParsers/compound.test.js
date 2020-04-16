@@ -1,5 +1,5 @@
 const { reg, text } = require('./atomic');
-const { seq, union } = require('./compound');
+const { rep, seq, union } = require('./compound');
 
 describe('union', () => {
   const parseUnion = union(text('ab'), text('cad'), text('boom'));
@@ -55,5 +55,49 @@ describe('seq', () => {
 
   test('if match on position fails, position is not moved', () => {
     expect(parseSeq('why I am here?', 4)[1]).toBe(4);
+  });
+});
+
+describe('rep', () => {
+  const parseRep = rep(text('ha'), text('-'));
+
+  test('if template was not found, return empty array match', () => {
+    expect(parseRep('boring')[0]).toEqual([]);
+  });
+
+  test('if template repeated one time, return array with one entry as match', () => {
+    expect(parseRep('ha')[0]).toEqual(['ha']);
+  });
+
+  test('if template repeated three times joined by separator, return array with three entries as match', () => {
+    expect(parseRep('ha-ha-ha')[0]).toEqual(['ha', 'ha', 'ha']);
+  });
+
+  test('if second separator was not found, return array with two entries as match', () => {
+    expect(parseRep('ha-haha')[0]).toEqual(['ha', 'ha']);
+  });
+
+  test('if second template failed to match, return array with one entry as match', () => {
+    expect(parseRep('ha-HA')[0]).toEqual(['ha']);
+  });
+
+  test('set position after last matching template', () => {
+    expect(parseRep('ha-ha')[1]).toBe(5);
+  })
+
+  test('positive position incremented to be after last template match', () => {
+    expect(parseRep('laugh like "ha-ha"', 12)[1]).toBe(17);
+  })
+
+  test('if template was not found, keep previous position', () => {
+    expect(parseRep('still boring')[1]).toBe(0);
+  });
+
+  test('if the second template failed to match, set position in the end of the first template', () => {
+    expect(parseRep('ha-HA')[1]).toBe(2);
+  });
+
+  test('if the second separator was not found, set position after the second match', () => {
+    expect(parseRep('ha-haha')[1]).toBe(5);
   });
 });

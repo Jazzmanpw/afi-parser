@@ -27,3 +27,25 @@ export function seq(...parsers: Array<ParserType<mixed>>): ParserType<Array<mixe
     [[], pos],
   );
 }
+
+export function rep<T>(parser: ParserType<T>, separatorParser: ParserType<string>): ParserType<Array<T>> {
+  const sepTemplateParser = seq(separatorParser, parser);
+  return (source, pos = 0) => {
+    const [firstResult, firstPos] = parser(source, pos);
+    if (!firstResult) {
+      return [[], pos];
+    }
+
+    const result = [firstResult];
+    let prevPos = firstPos;
+    while (true) {
+      const [newResult, newPos] = sepTemplateParser(source, prevPos);
+      if (newResult) {
+        result.push(newResult[1]);
+        prevPos = newPos;
+        continue;
+      }
+      return [result, prevPos]
+    }
+  }
+}
