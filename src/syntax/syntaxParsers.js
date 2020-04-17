@@ -2,7 +2,13 @@
 import { reg, seq, text, union } from '../basicParsers';
 
 import type { ParserResultType } from '../basicParsers';
-import type { RegResultType, RuleResultType, SeqResultType, TextResultType, UnionResultType } from './types';
+import type {
+  RegResultType,
+  RuleResultType,
+  SeqResultType,
+  TextResultType,
+  UnionResultType
+} from './types';
 
 const nameParser = seq(reg('[_a-zA-Z]\\w+'), reg(':\\s*'));
 export function name(source: string, pos: number = 0): ParserResultType<string> {
@@ -33,7 +39,7 @@ export function regTemplate(source: string, pos: number = 0): ParserResultType<R
   return [null, pos];
 }
 
-const spaces = reg(/\s+/);
+const spaces = reg('\\s+');
 const atomicTemplate = union(textTemplate, regTemplate);
 const seqItemTemplate = union(seqTemplate, textTemplate, regTemplate);
 const seqTemplateParser = seq(atomicTemplate, spaces, seqItemTemplate);

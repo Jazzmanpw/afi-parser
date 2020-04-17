@@ -1,7 +1,7 @@
 // @flow
 import type { ParserType, ParserResultType } from './types';
 
-export function union(...parsers: Array<ParserType<mixed>>): ParserType<mixed> {
+export function union(...parsers: Array<ParserType<any>>): ParserType<any> {
   return (source, pos = 0) => {
     for (const parser of parsers) {
       const result = parser(source, pos);
@@ -13,9 +13,9 @@ export function union(...parsers: Array<ParserType<mixed>>): ParserType<mixed> {
   };
 }
 
-export function seq(...parsers: Array<ParserType<mixed>>): ParserType<Array<mixed>> {
+export function seq(...parsers: Array<ParserType<any>>): ParserType<Array<any>> {
   return (source, pos = 0) => parsers.reduce(
-    ([prevResult, prevPos], parser): ParserResultType<Array<mixed>> => {
+    ([prevResult, prevPos], parser): ParserResultType<Array<any>> => {
       if (prevResult) {
         const [newResult, newPos] = parser(source, prevPos);
         if (newResult) {
@@ -32,20 +32,19 @@ export function rep<T>(parser: ParserType<T>, separatorParser: ParserType<string
   const sepTemplateParser = seq(separatorParser, parser);
   return (source, pos = 0) => {
     const [firstResult, firstPos] = parser(source, pos);
-    if (!firstResult) {
-      return [[], pos];
-    }
-
-    const result = [firstResult];
-    let prevPos = firstPos;
-    while (true) {
-      const [newResult, newPos] = sepTemplateParser(source, prevPos);
-      if (newResult) {
-        result.push(newResult[1]);
-        prevPos = newPos;
-        continue;
+    if (firstResult) {
+      const result = [firstResult];
+      let prevPos = firstPos;
+      while (true) {
+        const [newResult, newPos] = sepTemplateParser(source, prevPos);
+        if (newResult) {
+          result.push(newResult[1]);
+          prevPos = newPos;
+          continue;
+        }
+        return [result, prevPos];
       }
-      return [result, prevPos]
     }
+    return [[], pos];
   }
 }
