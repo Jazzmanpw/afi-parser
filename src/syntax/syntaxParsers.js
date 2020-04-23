@@ -3,6 +3,7 @@ import { reg, seq, text, union } from '../basicParsers';
 
 import type { ParserResultType } from '../basicParsers';
 import type {
+  GroupResultType,
   RegResultType,
   RepResultType,
   RuleResultType,
@@ -31,7 +32,7 @@ export function regTemplate(source: string, pos: number = 0): ParserResultType<R
   return [null, pos];
 }
 
-const atomicTemplate = union(textTemplate, regTemplate);
+const atomicTemplate = union(textTemplate, regTemplate, group);
 const repItemTemplate = union(repTemplate, atomicTemplate);
 const seqItemTemplate = union(seqTemplate, repItemTemplate);
 const unionItemTemplate = union(unionTemplate, seqItemTemplate);
@@ -59,6 +60,15 @@ export function unionTemplate(source: string, pos: number = 0): ParserResultType
   const [result, newPos] = unionTemplateParser(source, pos);
   if (result) {
     return [{ type: 'union', value: [result[0], result[2]] }, newPos];
+  }
+  return [null, pos];
+}
+
+const groupParser = seq(reg('\\(\\s*'), unionItemTemplate, reg('\\s*\\)'));
+export function group(source: string, pos: number = 0): ParserResultType<GroupResultType> {
+  const [result, newPos] = groupParser(source, pos);
+  if (result) {
+    return [{ type: 'group', value: result[1] }, newPos];
   }
   return [null, pos];
 }

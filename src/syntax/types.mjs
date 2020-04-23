@@ -19,6 +19,8 @@ type SeqItemType = RepItemType | SeqResultType
 export type UnionResultType = ISyntaxResult<'union', Array<UnionItemType>>
 type UnionItemType = SeqItemType | UnionResultType
 
+export type GroupResultType = ISyntaxResult<'group', UnionItemType>
+
 export type RuleResultType = {
   name: string,
   expression: UnionItemType,

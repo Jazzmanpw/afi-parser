@@ -1,5 +1,6 @@
 const {
   default: rule,
+  group,
   name,
   regTemplate,
   repTemplate,
@@ -240,6 +241,123 @@ describe('unionTemplate', () => {
 
   test('positive position incremented to be after the last child template', () => {
     expect(unionTemplate('union: /reg(ex)?/ | \'regular expression\'', 7)[1]).toBe(40);
+  });
+});
+
+describe('group', () => {
+  describe.each([
+    ['text', '(\'group\')', { type: 'text', value: 'group' }],
+    ['reg', '(/group/)', { type: 'reg', value: 'group' }],
+    ['rep', '(\'group\' ^ \'and\')', {
+      type: 'rep',
+      value: {
+        template: { type: 'text', value: 'group' },
+        separator: { type: 'text', value: 'and' },
+      },
+    }],
+    ['seq', '(\'long\' \'group\')', {
+      type: 'seq', value: [
+        { type: 'text', value: 'long' },
+        { type: 'text', value: 'group' },
+      ],
+    }],
+    ['union', '(\'group\' | \'group anyway\')', {
+      type: 'union', value: [
+        { type: 'text', value: 'group' },
+        { type: 'text', value: 'group anyway' },
+      ],
+    }],
+  ])('if %sTemplate wrapped in parentheses found', (_type, source, value) => {
+    let result;
+    beforeAll(() => {
+      result = group(source);
+    });
+    afterAll(() => {
+      result = null;
+    });
+
+    test('return `type: group`', () => {
+      expect(result[0].type).toBe('group');
+    });
+
+    test('return inner template result as match.value', () => {
+      expect(result[0].value).toEqual(value);
+    })
+  });
+
+  test('group may include more than two templates', () => {
+    const result = group('(/a/ \'b\' ^ \'c\')');
+    expect(result[0]).toEqual({
+      type: 'group',
+      value: {
+        type: 'seq', value: [
+          { type: 'reg', value: 'a' },
+          { type: 'rep', value: {
+            template: { type: 'text', value: 'b' },
+            separator: { type: 'text', value: 'c'},
+            },
+          },
+        ],
+      },
+    });
+  });
+
+  test('nested groups are allowed', () => {
+    const result = group('((\'a\' ^ \'b\') ^ \'c\')');
+    expect(result[0]).toEqual({
+      type: 'group',
+      value: {
+        type: 'rep',
+        value: {
+          template: {
+            type: 'group',
+            value: {
+              type: 'rep',
+              value: {
+                template: { type: 'text', value: 'a' },
+                separator: { type: 'text', value: 'b' },
+              },
+            },
+          },
+          separator: { type: 'text', value: 'c' },
+        }
+      }
+    })
+  });
+
+  test('optional spaces inside of parentheses are allowed', () => {
+    const result = group('(  \'I \'  \'love \'  \'spaces!!!\'     )');
+    expect(result[0]).toEqual({
+      type: 'group',
+      value: {
+        type: 'seq',
+        value: [
+          { type: 'text', value: 'I ' },
+          { type: 'seq', value: [{ type: 'text', value: 'love ' }, { type: 'text', value: 'spaces!!!' }] },
+        ],
+      },
+    });
+  });
+
+  test('positive position incremented to be after the last parenthesis', () => {
+    const result = group('littleGroup: (/little group/)', 13);
+    expect(result[1]).toBe(29);
+  });
+
+  test.each([
+    ['text', '(\'test (passes)\')', 'test (passes)'],
+    ['reg', '(/passes (too|) (=\\))?/)', 'passes (too|) (=\\))?'],
+  ])('parentheses need not to be escaped inside of %sTemplate', (type, source, value) => {
+    const result = group(source);
+    expect(result[0]).toEqual({ type: 'group', value: { type, value } });
+  });
+
+  test('empty group template is not allowed', () => {
+    expect(group('()')[0]).toBe(null);
+  });
+
+  test('if template is not closed with the second parenthesis, return null match', () => {
+    expect(group('(\'kill \' \'me\'')[0]).toBe(null);
   });
 });
 
