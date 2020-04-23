@@ -35,7 +35,7 @@ describe('reg', () => {
   const parseVariousLengthReg = reg('\\s+');
   const parseCaseSensitiveReg = reg('[GMT]B', false);
   const parseCaseInsensitiveReg = reg('fo{2}', true);
-  const parseAnotherCaseInsensitiveReg = reg('russia', "I'm truthy");
+  const parseAnotherCaseInsensitiveReg = reg('russia', 'I\'m truthy');
 
   test('if reg matches, return matched string', () => {
     expect(parseReg('barby')[0]).toBe('bar');
@@ -68,7 +68,7 @@ describe('reg', () => {
 
   test('if match not found in position, return null match', () => {
     expect(parseReg('embargo')[0]).toBe(null);
-  })
+  });
 
   test('if reg doesn\'t matches, keep position', () => {
     expect(parseReg('still no match', 4)[1]).toBe(4);

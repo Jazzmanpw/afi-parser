@@ -12,5 +12,5 @@ export function reg(pattern: string, ignoreCase?: boolean): ParserType<string> {
     reg.lastIndex = pos;
     const match = reg.exec(source);
     return match ? [match[0], reg.lastIndex] : [null, pos];
-  }
+  };
 }

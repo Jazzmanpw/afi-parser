@@ -51,27 +51,27 @@ describe('name', () => {
 
 describe('textTemplate', () => {
   test('text in single quotes parsed into `type: text`', () => {
-    expect(textTemplate("'some template'")[0].type).toBe('text');
+    expect(textTemplate('\'some template\'')[0].type).toBe('text');
   });
 
   test('text in single quotes returns string in the quotes as match.value', () => {
-    expect(textTemplate("'template'")[0].value).toBe('template');
+    expect(textTemplate('\'template\'')[0].value).toBe('template');
   });
 
   test('quotes escaped with backslash', () => {
-    expect(textTemplate("'\\'quoted\\''")[0].value).toBe("\\'quoted\\'");
+    expect(textTemplate('\'\\\'quoted\\\'\'')[0].value).toBe('\\\'quoted\\\'');
   });
 
   test('positive position incremented to be after the last quote', () => {
-    expect(textTemplate("name: 'template'", 6)[1]).toBe(16);
+    expect(textTemplate('name: \'template\'', 6)[1]).toBe(16);
   });
 
   test('empty text template is not parsed', () => {
-    expect(textTemplate("''")[0]).toBe(null);
+    expect(textTemplate('\'\'')[0]).toBe(null);
   });
 
   test('if template is not closed with the second quote, return null match', () => {
-    expect(textTemplate("'not closed")[0]).toBe(null);
+    expect(textTemplate('\'not closed')[0]).toBe(null);
   });
 });
 
@@ -103,22 +103,22 @@ describe('regTemplate', () => {
 
 describe('repTemplate', () => {
   test('if atomic templates joined with hat, return `type: rep`', () => {
-    const result = repTemplate("'ha'^'-'");
+    const result = repTemplate('\'ha\'^\'-\'');
     expect(result[0].type).toBe('rep');
   });
 
   test(`if binary rep found, return object with 
               left hand expression, parsed as template, as match.value.template and
               right hand expression, parsed as template, as match.value.separator`, () => {
-    const result = repTemplate("'a'^'b'");
+    const result = repTemplate('\'a\'^\'b\'');
     expect(result[0].value).toEqual({
       template: { type: 'text', value: 'a' },
       separator: { type: 'text', value: 'b' },
-    })
+    });
   });
 
   test('if ternary rep found, return it as nested binary repetitions', () => {
-    const result = repTemplate("'a'^'b'^'c'");
+    const result = repTemplate('\'a\'^\'b\'^\'c\'');
     expect(result[0].value).toEqual({
       template: { type: 'text', value: 'a' },
       separator: {
@@ -132,7 +132,7 @@ describe('repTemplate', () => {
   });
 
   test('optional spaces around hat are allowed', () => {
-    const result = repTemplate("/a/  ^ 'b'");
+    const result = repTemplate('/a/  ^ \'b\'');
     expect(result[0]).toEqual({
       type: 'rep',
       value: {
@@ -143,19 +143,19 @@ describe('repTemplate', () => {
   });
 
   test('positive position incremented to be after the last child template', () => {
-    const result = repTemplate("repeat: /[hH]o/ ^ '!'", 8);
+    const result = repTemplate('repeat: /[hH]o/ ^ \'!\'', 8);
     expect(result[1]).toBe(21);
   });
 });
 
 describe('seqTemplate', () => {
   test('if atomic templates joined with spaces found, return `type: seq`', () => {
-    const result = seqTemplate("'parse' 'it'");
+    const result = seqTemplate('\'parse\' \'it\'');
     expect(result[0].type).toBe('seq');
   });
 
   test('if binary sequence found, return array of syntax results as match.value', () => {
-    const result = seqTemplate("'Parse' 'It'");
+    const result = seqTemplate('\'Parse\' \'It\'');
     expect(result[0].value).toEqual([
       { type: 'text', value: 'Parse' },
       { type: 'text', value: 'It' },
@@ -163,7 +163,7 @@ describe('seqTemplate', () => {
   });
 
   test('if ternary sequence found, return it as nested binary sequences', () => {
-    const result = seqTemplate("'we ' /go(nna|ing to) / 'parse'");
+    const result = seqTemplate('\'we \' /go(nna|ing to) / \'parse\'');
     expect(result[0]).toEqual({
       type: 'seq',
       value: [
@@ -177,10 +177,10 @@ describe('seqTemplate', () => {
         }
       ]
     });
-  })
+  });
 
   test('multiple spaces are allowed', () => {
-    const result = seqTemplate("'many'   'spaces'");
+    const result = seqTemplate('\'many\'   \'spaces\'');
     expect(result[0]).toEqual({
       type: 'seq',
       value: [
@@ -191,29 +191,29 @@ describe('seqTemplate', () => {
   });
 
   test('positive position incremented to be after the last child template', () => {
-    const result = seqTemplate("key: 'sequential' /parser/", 5);
+    const result = seqTemplate('key: \'sequential\' /parser/', 5);
     expect(result[1]).toBe(26);
   });
 
   test('zero-spaces separator is not allowed', () => {
-    expect(seqTemplate("'cannot''parse'")[0]).toBe(null);
+    expect(seqTemplate('\'cannot\'\'parse\'')[0]).toBe(null);
   });
 });
 
 describe('unionTemplate', () => {
   test('if atomic templates joined with pipe, return `type: union`', () => {
-    expect(unionTemplate("'this'|'that'")[0].type).toBe('union');
+    expect(unionTemplate('\'this\'|\'that\'')[0].type).toBe('union');
   });
 
   test('if binary union found, return array of syntax results as match.value', () => {
-    expect(unionTemplate("'this'|'that'")[0].value).toEqual([
+    expect(unionTemplate('\'this\'|\'that\'')[0].value).toEqual([
       { type: 'text', value: 'this' },
       { type: 'text', value: 'that' },
     ]);
   });
 
   test('if ternary union found, return it as nested binary unions', () => {
-    expect(unionTemplate("'parse'|'translate'|/read/")[0]).toEqual({
+    expect(unionTemplate('\'parse\'|\'translate\'|/read/')[0]).toEqual({
       type: 'union',
       value: [
         { type: 'text', value: 'parse' },
@@ -229,7 +229,7 @@ describe('unionTemplate', () => {
   });
 
   test('optional spaces around pipe are allowed', () => {
-    expect(unionTemplate("'connecting'  |   'people'")[0]).toEqual({
+    expect(unionTemplate('\'connecting\'  |   \'people\'')[0]).toEqual({
       type: 'union',
       value: [
         { type: 'text', value: 'connecting' },
@@ -239,23 +239,25 @@ describe('unionTemplate', () => {
   });
 
   test('positive position incremented to be after the last child template', () => {
-    expect(unionTemplate("union: /reg(ex)?/ | 'regular expression'", 7)[1]).toBe(40);
+    expect(unionTemplate('union: /reg(ex)?/ | \'regular expression\'', 7)[1]).toBe(40);
   });
-})
+});
 
 describe('rule', () => {
   test('return parsed name as rule.name', () => {
-    expect(rule("ruleName: 'simple rule'")[0].name).toBe('ruleName');
+    expect(rule('ruleName: \'simple rule\'')[0].name).toBe('ruleName');
   });
 
   test('return parsed expression AST as rule.expression', () => {
-    expect(rule("ruleName: 'rule' /\\s+/ 'expression' | 'ruleExpression'")[0].expression).toEqual({
+    expect(rule('ruleName: \'rule\' /\\s+/ \'expression\' | \'ruleExpression\'')[0].expression).toEqual({
       type: 'union',
       value: [
-        { type: 'seq', value: [
-          { type: 'text', value: 'rule' },
-          { type: 'seq', value: [{ type: 'reg', value: '\\s+' }, { type: 'text', value: 'expression' }] },
-        ] },
+        {
+          type: 'seq', value: [
+            { type: 'text', value: 'rule' },
+            { type: 'seq', value: [{ type: 'reg', value: '\\s+' }, { type: 'text', value: 'expression' }] },
+          ],
+        },
         { type: 'text', value: 'ruleExpression' },
       ],
     });

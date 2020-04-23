@@ -1,5 +1,5 @@
 // @flow
-import type { ParserType, ParserResultType } from './types';
+import type { ParserResultType, ParserType } from './types';
 
 export function union(...parsers: Array<ParserType<any>>): ParserType<any> {
   return (source, pos = 0) => {
@@ -46,5 +46,5 @@ export function rep<T>(parser: ParserType<T>, separatorParser: ParserType<string
       }
     }
     return [[], pos];
-  }
+  };
 }

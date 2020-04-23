@@ -33,10 +33,10 @@ describe('union', () => {
 });
 
 describe('seq', () => {
-  const parseSeq = seq(reg('par+s'), text("'em"), text(' all'));
+  const parseSeq = seq(reg('par+s'), text('\'em'), text(' all'));
 
   test('if sequence matches, return match as array of all matches', () => {
-    expect(parseSeq('parrrs\'em all')[0]).toEqual(['parrrs', "'em", ' all']);
+    expect(parseSeq('parrrs\'em all')[0]).toEqual(['parrrs', '\'em', ' all']);
   });
 
   test('if sequence matches, increment position by all matches length', () => {
@@ -83,11 +83,11 @@ describe('rep', () => {
 
   test('set position after last matching template', () => {
     expect(parseRep('ha-ha')[1]).toBe(5);
-  })
+  });
 
   test('positive position incremented to be after last template match', () => {
     expect(parseRep('laugh like "ha-ha"', 12)[1]).toBe(17);
-  })
+  });
 
   test('if template was not found, keep previous position', () => {
     expect(parseRep('still boring')[1]).toBe(0);

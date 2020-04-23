@@ -11,7 +11,7 @@ import type {
   UnionResultType
 } from './types';
 
-const quote = text("'");
+const quote = text('\'');
 const textTemplateParser = seq(quote, reg('(\\\\.|[^\'\\\\])+'), quote);
 export function textTemplate(source: string, pos: number = 0): ParserResultType<TextResultType> {
   const [result, newPos] = textTemplateParser(source, pos);
@@ -49,7 +49,7 @@ const seqTemplateParser = seq(repItemTemplate, wrappedWithOptionalSpaces('\\s'),
 export function seqTemplate(source: string, pos: number = 0): ParserResultType<SeqResultType> {
   const [result, newPos] = seqTemplateParser(source, pos);
   if (result) {
-    return [{ type: 'seq', value: [result[0], result[2]] }, newPos]
+    return [{ type: 'seq', value: [result[0], result[2]] }, newPos];
   }
   return [null, pos];
 }
