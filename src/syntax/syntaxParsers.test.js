@@ -144,7 +144,7 @@ describe('repTemplate', () => {
 
   test('positive position incremented to be after the last child template', () => {
     const result = repTemplate("repeat: /[hH]o/ ^ '!'", 8);
-    expect(result[1]).toBe(22);
+    expect(result[1]).toBe(21);
   });
 });
 

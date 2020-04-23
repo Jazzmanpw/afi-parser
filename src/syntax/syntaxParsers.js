@@ -11,15 +11,6 @@ import type {
   UnionResultType
 } from './types';
 
-const nameParser = seq(reg('[_a-zA-Z]\\w+'), reg(':\\s*'));
-export function name(source: string, pos: number = 0): ParserResultType<string> {
-  const [result, newPos] = nameParser(source, pos);
-  if (result) {
-    return [result[0], newPos];
-  }
-  return [null, pos];
-}
-
 const quote = text("'");
 const textTemplateParser = seq(quote, reg('(\\\\.|[^\'\\\\])+'), quote);
 export function textTemplate(source: string, pos: number = 0): ParserResultType<TextResultType> {
@@ -40,10 +31,12 @@ export function regTemplate(source: string, pos: number = 0): ParserResultType<R
   return [null, pos];
 }
 
-const hat = reg('\\s*\\^\\s*');
 const atomicTemplate = union(textTemplate, regTemplate);
 const repItemTemplate = union(repTemplate, atomicTemplate);
-const repTemplateParser = seq(atomicTemplate, hat, repItemTemplate);
+const seqItemTemplate = union(seqTemplate, repItemTemplate);
+const unionItemTemplate = union(unionTemplate, seqItemTemplate);
+
+const repTemplateParser = seq(atomicTemplate, wrappedWithOptionalSpaces('\\^'), repItemTemplate);
 export function repTemplate(source: string, pos: number = 0): ParserResultType<RepResultType> {
   const [result, newPos] = repTemplateParser(source, pos);
   if (result) {
@@ -52,9 +45,7 @@ export function repTemplate(source: string, pos: number = 0): ParserResultType<R
   return [null, pos];
 }
 
-const spaces = reg('\\s+');
-const seqItemTemplate = union(seqTemplate, repItemTemplate);
-const seqTemplateParser = seq(atomicTemplate, spaces, seqItemTemplate);
+const seqTemplateParser = seq(repItemTemplate, wrappedWithOptionalSpaces('\\s'), seqItemTemplate);
 export function seqTemplate(source: string, pos: number = 0): ParserResultType<SeqResultType> {
   const [result, newPos] = seqTemplateParser(source, pos);
   if (result) {
@@ -63,13 +54,20 @@ export function seqTemplate(source: string, pos: number = 0): ParserResultType<S
   return [null, pos];
 }
 
-const or = reg('\\s*\\|\\s*');
-const unionItemTemplate = union(unionTemplate, seqItemTemplate);
-const unionTemplateParser = seq(seqItemTemplate, or, unionItemTemplate);
+const unionTemplateParser = seq(seqItemTemplate, wrappedWithOptionalSpaces('\\|'), unionItemTemplate);
 export function unionTemplate(source: string, pos: number = 0): ParserResultType<UnionResultType> {
   const [result, newPos] = unionTemplateParser(source, pos);
   if (result) {
     return [{ type: 'union', value: [result[0], result[2]] }, newPos];
+  }
+  return [null, pos];
+}
+
+const nameParser = seq(reg('[_a-zA-Z]\\w+'), reg(':\\s*'));
+export function name(source: string, pos: number = 0): ParserResultType<string> {
+  const [result, newPos] = nameParser(source, pos);
+  if (result) {
+    return [result[0], newPos];
   }
   return [null, pos];
 }
@@ -81,4 +79,8 @@ export default function rule(source: string, pos: number = 0): ParserResultType<
     return [{ name: result[0], expression: result[1] }, newPos];
   }
   return [null, pos];
+}
+
+function wrappedWithOptionalSpaces(c) {
+  return reg(`\\s*${c}\\s*`);
 }
