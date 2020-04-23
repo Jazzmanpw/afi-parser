@@ -1,4 +1,12 @@
-const { default: rule, name, regTemplate, seqTemplate, textTemplate, unionTemplate } = require('./syntaxParsers');
+const {
+  default: rule,
+  name,
+  regTemplate,
+  repTemplate,
+  seqTemplate,
+  textTemplate,
+  unionTemplate,
+} = require('./syntaxParsers');
 
 describe('name', () => {
   test('match a name starting with a letter', () => {
@@ -90,6 +98,53 @@ describe('regTemplate', () => {
 
   test('if template is not closed with the second slash, return null match', () => {
     expect(regTemplate('/close me')[0]).toBe(null);
+  });
+});
+
+describe('repTemplate', () => {
+  test('if atomic templates joined with hat, return `type: rep`', () => {
+    const result = repTemplate("'ha'^'-'");
+    expect(result[0].type).toBe('rep');
+  });
+
+  test(`if binary rep found, return object with 
+              left hand expression, parsed as template, as match.value.template and
+              right hand expression, parsed as template, as match.value.separator`, () => {
+    const result = repTemplate("'a'^'b'");
+    expect(result[0].value).toEqual({
+      template: { type: 'text', value: 'a' },
+      separator: { type: 'text', value: 'b' },
+    })
+  });
+
+  test('if ternary rep found, return it as nested binary repetitions', () => {
+    const result = repTemplate("'a'^'b'^'c'");
+    expect(result[0].value).toEqual({
+      template: { type: 'text', value: 'a' },
+      separator: {
+        type: 'rep',
+        value: {
+          template: { type: 'text', value: 'b' },
+          separator: { type: 'text', value: 'c' },
+        },
+      },
+    });
+  });
+
+  test('optional spaces around hat are allowed', () => {
+    const result = repTemplate("/a/  ^ 'b'");
+    expect(result[0]).toEqual({
+      type: 'rep',
+      value: {
+        template: { type: 'reg', value: 'a' },
+        separator: { type: 'text', value: 'b' },
+      },
+    });
+  });
+
+  test('positive position incremented to be after the last child template', () => {
+    const result = repTemplate("repeat: /[hH]o/ ^ '!'", 8);
+    expect(result[1]).toBe(22);
   });
 });
 
