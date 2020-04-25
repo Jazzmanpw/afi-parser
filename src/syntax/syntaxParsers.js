@@ -78,20 +78,20 @@ export function group(source: string, pos: number = 0): ParserResultType<GroupRe
   return [null, pos];
 }
 
-const nameParser = seq(reg('[_a-zA-Z]\\w+'), reg(':\\s*'));
+const nameParser = reg('[_a-zA-Z]\\w+');
 export function name(source: string, pos: number = 0): ParserResultType<string> {
   const [result, newPos] = nameParser(source, pos);
   if (result) {
-    return [result[0], newPos];
+    return [result, newPos];
   }
   return [null, pos];
 }
 
-const ruleParser = seq(name, unionItemTemplate);
+const ruleParser = seq(name, reg(':\\s*'), unionItemTemplate);
 export default function rule(source: string, pos: number = 0): ParserResultType<RuleResultType> {
   const [result, newPos] = ruleParser(source, pos);
   if (result) {
-    return [{ name: result[0], expression: normalizeTree(result[1]) }, newPos];
+    return [{ name: result[0], expression: normalizeTree(result[2]) }, newPos];
   }
   return [null, pos];
 }

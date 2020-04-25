@@ -11,42 +11,38 @@ const {
 
 describe('name', () => {
   test('match a name starting with a letter', () => {
-    expect(name('abra:')[0]).toBe('abra');
+    expect(name('abra')[0]).toBe('abra');
   });
 
   test('match a name starting with a lodash', () => {
-    expect(name('_cadabra:')[0]).toBe('_cadabra');
+    expect(name('_cadabra')[0]).toBe('_cadabra');
   });
 
   test('match a name with uppercase letters', () => {
-    expect(name('LaTeX:')[0]).toBe('LaTeX');
+    expect(name('LaTeX')[0]).toBe('LaTeX');
   });
 
   test('match a name with lodash in the middle', () => {
-    expect(name('ka_boom:')[0]).toBe('ka_boom');
+    expect(name('ka_boom')[0]).toBe('ka_boom');
   });
 
   test('match a name with numbers in the middle', () => {
-    expect(name('road66:')[0]).toBe('road66');
+    expect(name('road66')[0]).toBe('road66');
   });
 
   test('match name on positive position', () => {
-    expect(name('prefix^name:', 7)[0]).toBe('name');
+    expect(name('prefix^name', 7)[0]).toBe('name');
   });
-  test('set position after the trailing spaces after the semicolon', () => {
-    expect(name('valid_name:   some value')[1]).toBe(14);
+  test('set position after the last \\w char of the name', () => {
+    expect(name('valid_name:   some value')[1]).toBe(10);
   });
 
   test('don\'t match a name starting with a number', () => {
     expect(name('5nizza')[0]).toBe(null);
   });
 
-  test('don\'t match a name with any symbol that is not \\w', () => {
-    expect(name('li$tener')[0]).toBe(null);
-  });
-
-  test('don\'t match a name with a missing semicolon', () => {
-    expect(name('noname')[0]).toBe(null);
+  test('stop match on any symbol that is not \\w', () => {
+    expect(name('li$tener')[0]).toBe('li');
   });
 });
 
@@ -369,6 +365,19 @@ describe('rule', () => {
   test('return parsed expression AST as rule.expression', () => {
     const result = rule('ruleName: \'ruleExpression\'');
     expect(result[0].expression).toEqual({ type: 'text', value: 'ruleExpression' });
+  });
+
+  test('allow multiple spaces after the semicolon', () => {
+    expect(rule('name:    \'space\' /fever/')[0]).toEqual({
+      name: 'name',
+      expression: {
+        type: 'seq',
+        value: [
+          { type: 'text', value: 'space' },
+          { type: 'reg', value: 'fever' },
+        ],
+      },
+    });
   });
 
   test('if name parsing fails, return null match', () => {
