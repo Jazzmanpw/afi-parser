@@ -367,18 +367,8 @@ describe('rule', () => {
   });
 
   test('return parsed expression AST as rule.expression', () => {
-    expect(rule('ruleName: \'rule\' /\\s+/ \'expression\' | \'ruleExpression\'')[0].expression).toEqual({
-      type: 'union',
-      value: [
-        {
-          type: 'seq', value: [
-            { type: 'text', value: 'rule' },
-            { type: 'seq', value: [{ type: 'reg', value: '\\s+' }, { type: 'text', value: 'expression' }] },
-          ],
-        },
-        { type: 'text', value: 'ruleExpression' },
-      ],
-    });
+    const result = rule('ruleName: \'ruleExpression\'');
+    expect(result[0].expression).toEqual({ type: 'text', value: 'ruleExpression' });
   });
 
   test('if name parsing fails, return null match', () => {
@@ -387,5 +377,39 @@ describe('rule', () => {
 
   test('if one of templates fails, return null match', () => {
     expect(rule('broken: /close me')[0]).toBe(null);
+  });
+
+  test('n sequences in a row return as one seq with array of length n as match.value', () => {
+    const result = rule('name: /this/ /is/ \'a\' /sequence/');
+    expect(result[0].expression).toEqual({
+      type: 'seq',
+      value: [
+        { type: 'reg', value: 'this' },
+        { type: 'reg', value: 'is' },
+        { type: 'text', value: 'a' },
+        { type: 'reg', value: 'sequence' },
+      ],
+    });
+  });
+
+  test('n unions in a row return as one union with array of length n as match.value', () => {
+    const result = rule('name: \'union\' | \'values\' | /any/ | /set/');
+    expect(result[0].expression).toEqual({
+      type: 'union',
+      value: [
+        { type: 'text', value: 'union' },
+        { type: 'text', value: 'values' },
+        { type: 'reg', value: 'any' },
+        { type: 'reg', value: 'set' },
+      ],
+    });
+  });
+
+  test('group match value replaces the group', () => {
+    const result = rule('name: (\'nested\' (\'group\'))');
+    expect(result[0].expression).toEqual({
+      type: 'seq',
+      value: [{ type: 'text', value: 'nested' }, { type: 'text', value: 'group' }],
+    });
   });
 });

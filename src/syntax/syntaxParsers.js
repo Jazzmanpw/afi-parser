@@ -3,13 +3,14 @@ import { reg, seq, text, union } from '../basicParsers';
 
 import type { ParserResultType } from '../basicParsers';
 import type {
+  ExpressionType,
   GroupResultType,
   RegResultType,
   RepResultType,
   RuleResultType,
   SeqResultType,
   TextResultType,
-  UnionResultType
+  UnionResultType,
 } from './types';
 
 const quote = text('\'');
@@ -64,6 +65,10 @@ export function unionTemplate(source: string, pos: number = 0): ParserResultType
   return [null, pos];
 }
 
+function wrappedWithOptionalSpaces(c) {
+  return reg(`\\s*${c}\\s*`);
+}
+
 const groupParser = seq(reg('\\(\\s*'), unionItemTemplate, reg('\\s*\\)'));
 export function group(source: string, pos: number = 0): ParserResultType<GroupResultType> {
   const [result, newPos] = groupParser(source, pos);
@@ -86,11 +91,36 @@ const ruleParser = seq(name, unionItemTemplate);
 export default function rule(source: string, pos: number = 0): ParserResultType<RuleResultType> {
   const [result, newPos] = ruleParser(source, pos);
   if (result) {
-    return [{ name: result[0], expression: result[1] }, newPos];
+    return [{ name: result[0], expression: normalizeTree(result[1]) }, newPos];
   }
   return [null, pos];
 }
 
-function wrappedWithOptionalSpaces(c) {
-  return reg(`\\s*${c}\\s*`);
+function normalizeTree({ type, value }: ExpressionType): ExpressionType {
+  switch (type) {
+    case 'text':
+    case 'reg':
+      return { type, value };
+    case 'group':
+      return normalizeTree(value);
+    case 'seq':
+    case 'union': {
+      const normValue = flatNestedBinaries(type, value);
+      return { type, value: normValue.map(normalizeTree) };
+    }
+    case 'rep': {
+      const { template, separator } = value;
+      return { type, value: { template: normalizeTree(template), separator: normalizeTree(separator) } };
+    }
+    default:
+      throw new TypeError('Unknown type of result encountered during tree normalization')
+  }
+}
+
+function flatNestedBinaries(type: string, value: Array): Array {
+  let normValue = value;
+  while (normValue.some(v => v.type === type)) {
+    normValue = normValue.reduce((norm, v) => v.type === type ? [...norm, ...v.value] : [...norm, v], []);
+  }
+  return normValue;
 }
