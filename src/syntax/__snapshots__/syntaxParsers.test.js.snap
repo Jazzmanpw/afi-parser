@@ -1,0 +1,341 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`group group may include more than two templates 1`] = `
+Object {
+  "type": "group",
+  "value": Object {
+    "type": "seq",
+    "value": Array [
+      Object {
+        "type": "reg",
+        "value": "a",
+      },
+      Object {
+        "type": "rep",
+        "value": Object {
+          "separator": Object {
+            "type": "text",
+            "value": "c",
+          },
+          "template": Object {
+            "type": "text",
+            "value": "b",
+          },
+        },
+      },
+    ],
+  },
+}
+`;
+
+exports[`group if regTemplate wrapped in parentheses found return inner template result as match.value 1`] = `
+Object {
+  "type": "reg",
+  "value": "group",
+}
+`;
+
+exports[`group if repTemplate wrapped in parentheses found return inner template result as match.value 1`] = `
+Object {
+  "type": "rep",
+  "value": Object {
+    "separator": Object {
+      "type": "text",
+      "value": "and",
+    },
+    "template": Object {
+      "type": "text",
+      "value": "group",
+    },
+  },
+}
+`;
+
+exports[`group if seqTemplate wrapped in parentheses found return inner template result as match.value 1`] = `
+Object {
+  "type": "seq",
+  "value": Array [
+    Object {
+      "type": "text",
+      "value": "long",
+    },
+    Object {
+      "type": "text",
+      "value": "group",
+    },
+  ],
+}
+`;
+
+exports[`group if textTemplate wrapped in parentheses found return inner template result as match.value 1`] = `
+Object {
+  "type": "text",
+  "value": "group",
+}
+`;
+
+exports[`group if unionTemplate wrapped in parentheses found return inner template result as match.value 1`] = `
+Object {
+  "type": "union",
+  "value": Array [
+    Object {
+      "type": "text",
+      "value": "group",
+    },
+    Object {
+      "type": "text",
+      "value": "group anyway",
+    },
+  ],
+}
+`;
+
+exports[`group nested groups are allowed 1`] = `
+Object {
+  "type": "group",
+  "value": Object {
+    "type": "rep",
+    "value": Object {
+      "separator": Object {
+        "type": "text",
+        "value": "c",
+      },
+      "template": Object {
+        "type": "group",
+        "value": Object {
+          "type": "rep",
+          "value": Object {
+            "separator": Object {
+              "type": "text",
+              "value": "b",
+            },
+            "template": Object {
+              "type": "text",
+              "value": "a",
+            },
+          },
+        },
+      },
+    },
+  },
+}
+`;
+
+exports[`group optional spaces inside of parentheses are allowed 1`] = `
+Object {
+  "type": "group",
+  "value": Object {
+    "type": "seq",
+    "value": Array [
+      Object {
+        "type": "text",
+        "value": "I ",
+      },
+      Object {
+        "type": "seq",
+        "value": Array [
+          Object {
+            "type": "text",
+            "value": "love ",
+          },
+          Object {
+            "type": "text",
+            "value": "spaces!!!",
+          },
+        ],
+      },
+    ],
+  },
+}
+`;
+
+exports[`playground for case toy assertion 1`] = `"case"`;
+
+exports[`repTemplate if binary rep found, return object with
+              left hand expression, parsed as template, as match.value.template and
+              right hand expression, parsed as template, as match.value.separator 1`] = `
+Object {
+  "separator": Object {
+    "type": "text",
+    "value": "b",
+  },
+  "template": Object {
+    "type": "text",
+    "value": "a",
+  },
+}
+`;
+
+exports[`repTemplate if ternary rep found, return it as nested binary repetitions 1`] = `
+Object {
+  "separator": Object {
+    "type": "rep",
+    "value": Object {
+      "separator": Object {
+        "type": "text",
+        "value": "c",
+      },
+      "template": Object {
+        "type": "text",
+        "value": "b",
+      },
+    },
+  },
+  "template": Object {
+    "type": "text",
+    "value": "a",
+  },
+}
+`;
+
+exports[`repTemplate optional spaces around hat are allowed 1`] = `
+Object {
+  "type": "rep",
+  "value": Object {
+    "separator": Object {
+      "type": "text",
+      "value": "b",
+    },
+    "template": Object {
+      "type": "reg",
+      "value": "a",
+    },
+  },
+}
+`;
+
+exports[`rule allow multiple spaces after the semicolon 1`] = `
+Object {
+  "expression": Object {
+    "type": "seq",
+    "value": Array [
+      Object {
+        "type": "text",
+        "value": "space",
+      },
+      Object {
+        "type": "reg",
+        "value": "fever",
+      },
+    ],
+  },
+  "name": "name",
+}
+`;
+
+exports[`rule return parsed expression AST as rule.expression 1`] = `
+Object {
+  "type": "text",
+  "value": "ruleExpression",
+}
+`;
+
+exports[`seqTemplate if binary sequence found, return array of syntax results as match.value 1`] = `
+Array [
+  Object {
+    "type": "text",
+    "value": "Parse",
+  },
+  Object {
+    "type": "text",
+    "value": "It",
+  },
+]
+`;
+
+exports[`seqTemplate if ternary sequence found, return it as nested binary sequences 1`] = `
+Object {
+  "type": "seq",
+  "value": Array [
+    Object {
+      "type": "text",
+      "value": "we ",
+    },
+    Object {
+      "type": "seq",
+      "value": Array [
+        Object {
+          "type": "reg",
+          "value": "go(nna|ing to) ",
+        },
+        Object {
+          "type": "text",
+          "value": "parse",
+        },
+      ],
+    },
+  ],
+}
+`;
+
+exports[`seqTemplate multiple spaces are allowed 1`] = `
+Object {
+  "type": "seq",
+  "value": Array [
+    Object {
+      "type": "text",
+      "value": "many",
+    },
+    Object {
+      "type": "text",
+      "value": "spaces",
+    },
+  ],
+}
+`;
+
+exports[`toy assertion for case 1`] = `"case"`;
+
+exports[`unionTemplate if binary union found, return array of syntax results as match.value 1`] = `
+Array [
+  Object {
+    "type": "text",
+    "value": "this",
+  },
+  Object {
+    "type": "text",
+    "value": "that",
+  },
+]
+`;
+
+exports[`unionTemplate if ternary union found, return it as nested binary unions 1`] = `
+Object {
+  "type": "union",
+  "value": Array [
+    Object {
+      "type": "text",
+      "value": "parse",
+    },
+    Object {
+      "type": "union",
+      "value": Array [
+        Object {
+          "type": "text",
+          "value": "translate",
+        },
+        Object {
+          "type": "reg",
+          "value": "read",
+        },
+      ],
+    },
+  ],
+}
+`;
+
+exports[`unionTemplate optional spaces around pipe are allowed 1`] = `
+Object {
+  "type": "union",
+  "value": Array [
+    Object {
+      "type": "text",
+      "value": "connecting",
+    },
+    Object {
+      "type": "text",
+      "value": "people",
+    },
+  ],
+}
+`;
