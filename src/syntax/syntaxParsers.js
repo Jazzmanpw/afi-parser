@@ -121,7 +121,10 @@ function normalizeTree({ type, value }: ExpressionType): ExpressionType {
       return { type, value: { template: normalizeTree(template), separator: normalizeTree(separator) } };
     }
     default:
-      throw new TypeError('Unknown type of result encountered during tree normalization')
+      throw new TypeError(
+        'Unknown type of result encountered during tree normalization. ' +
+        `type: ${type}, value: ${value}`
+      );
   }
 }
 
