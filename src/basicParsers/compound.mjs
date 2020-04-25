@@ -18,7 +18,7 @@ export function seq(...parsers: Array<ParserType<any>>): ParserType<Array<any>> 
     ([prevResult, prevPos], parser): ParserResultType<Array<any>> => {
       if (prevResult) {
         const [newResult, newPos] = parser(source, prevPos);
-        if (newResult) {
+        if (newResult !== null) {
           return [[...prevResult, newResult], newPos];
         }
       }
@@ -32,18 +32,19 @@ export function rep<T>(parser: ParserType<T>, separatorParser: ParserType<string
   const sepTemplateParser = seq(separatorParser, parser);
   return (source, pos = 0) => {
     const [firstResult, firstPos] = parser(source, pos);
-    if (firstResult) {
+    if (firstResult !== null) {
       const result = [firstResult];
       let prevPos = firstPos;
+
       while (true) {
         const [newResult, newPos] = sepTemplateParser(source, prevPos);
-        if (newResult) {
-          result.push(newResult[1]);
-          prevPos = newPos;
-          continue;
+        if (!newResult || newResult.every(r => r === '')) {
+          break;
         }
-        return [result, prevPos];
+        result.push(newResult[1]);
+        prevPos = newPos;
       }
+      return [result, prevPos];
     }
     return [[], pos];
   };

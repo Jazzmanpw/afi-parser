@@ -4,6 +4,7 @@ const { rep, seq, union } = require('./compound');
 describe('union', () => {
   const parseUnion = union(text('ab'), text('cad'), text('boom'));
   const parseOverlappingUnion = union(text('par'), text('parse'));
+  const parseUnionWithEmptyMatch = union(text('full'), reg('(not full)?'));
 
   test('if any of parsers match, return its match', () => {
     expect(parseUnion('abra')[0]).toBe('ab');
@@ -13,6 +14,10 @@ describe('union', () => {
 
   test('first parsers have priority', () => {
     expect(parseOverlappingUnion('parser works')[0]).toBe('par');
+  });
+
+  test('if parser matches empty string, return it as match', () => {
+    expect(parseUnionWithEmptyMatch('empty')[0]).toBe('');
   });
 
   test('if parser matches, increment position by match length', () => {
@@ -34,9 +39,14 @@ describe('union', () => {
 
 describe('seq', () => {
   const parseSeq = seq(reg('par+s'), text('\'em'), text(' all'));
+  const parseSeqWithEmptyMatch = seq(text('parse'), reg('r?'));
 
   test('if sequence matches, return match as array of all matches', () => {
     expect(parseSeq('parrrs\'em all')[0]).toEqual(['parrrs', '\'em', ' all']);
+  });
+
+  test('if parser matches empty string, return it as match', () => {
+    expect(parseSeqWithEmptyMatch('parse')[0][1]).toBe('');
   });
 
   test('if sequence matches, increment position by all matches length', () => {
@@ -60,6 +70,7 @@ describe('seq', () => {
 
 describe('rep', () => {
   const parseRep = rep(text('ha'), text('-'));
+  const parsePossiblyEmptyRep = rep(reg('(foo|bar)?'), reg('-?'));
 
   test('if template was not found, return empty array match', () => {
     expect(parseRep('boring')[0]).toEqual([]);
@@ -79,6 +90,23 @@ describe('rep', () => {
 
   test('if second template failed to match, return array with one entry as match', () => {
     expect(parseRep('ha-HA')[0]).toEqual(['ha']);
+  });
+
+  test('if template matches empty string, continue matching and return its match as empty string', () => {
+    expect(parsePossiblyEmptyRep('foo--bar')[0]).toEqual(['foo', '', 'bar']);
+  });
+
+  test('if separator matches empty string, continue matching', () => {
+    expect(parsePossiblyEmptyRep('foobar')[0]).toEqual(['foo', 'bar']);
+  });
+
+  test('if separator and then template match two empty strings in a row, end match', () => {
+    expect(parsePossiblyEmptyRep('foo-barrack')[0]).toEqual(['foo', 'bar']);
+  });
+
+  test(`if template and then separator match two empty strings in a row, 
+              end match and return the match with an empty string as the last value`, () => {
+    expect(parsePossiblyEmptyRep('foo-bar-baz')[0]).toEqual(['foo', 'bar', '']);
   });
 
   test('set position after last matching template', () => {
