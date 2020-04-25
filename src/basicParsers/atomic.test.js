@@ -36,18 +36,23 @@ describe('reg', () => {
   const parseCaseSensitiveReg = reg('[GMT]B', false);
   const parseCaseInsensitiveReg = reg('fo{2}', true);
   const parseAnotherCaseInsensitiveReg = reg('russia', 'I\'m truthy');
+  const parseMatchingEmptyStringReg = reg('o?');
 
   test('if reg matches, return matched string', () => {
     expect(parseReg('barby')[0]).toBe('bar');
     expect(parseReg('bazaar')[0]).toBe('baz');
   });
 
-  test('if second argument is falsy, test is case sensitive', () => {
+  test('if reg matches an empty string, don\'t fail match', () => {
+    expect(parseMatchingEmptyStringReg('done')[0]).toBe('');
+  });
+
+  test('if second argument is falsy, regexp is case sensitive', () => {
     expect(parseReg('Barbara')[0]).toBe(null);
     expect(parseCaseSensitiveReg('10gb', 2)[0]).toBe(null);
   });
 
-  test('if second argument is truthy, test is case insensitive', () => {
+  test('if second argument is truthy, regexp is case insensitive', () => {
     expect(parseCaseInsensitiveReg('Football')[0]).toBe('Foo');
     expect(parseAnotherCaseInsensitiveReg('RuSsIaN StYlE')[0]).toBe('RuSsIa');
   });
@@ -62,7 +67,7 @@ describe('reg', () => {
     expect(parseVariousLengthReg('and      six spaces', 3)[1]).toBe(9);
   });
 
-  test('reg doesn\'t match, return null match', () => {
+  test('if reg doesn\'t match, return null match', () => {
     expect(parseReg('no match at all')[0]).toBe(null);
   });
 
