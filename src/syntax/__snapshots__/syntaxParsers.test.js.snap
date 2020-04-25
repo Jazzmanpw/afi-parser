@@ -8,7 +8,10 @@ Object {
     "value": Array [
       Object {
         "type": "reg",
-        "value": "a",
+        "value": Object {
+          "ignoreCase": false,
+          "pattern": "a",
+        },
       },
       Object {
         "type": "rep",
@@ -31,7 +34,10 @@ Object {
 exports[`group if regTemplate wrapped in parentheses found return inner template result as match.value 1`] = `
 Object {
   "type": "reg",
-  "value": "group",
+  "value": Object {
+    "ignoreCase": false,
+    "pattern": "group",
+  },
 }
 `;
 
@@ -149,9 +155,7 @@ Object {
 }
 `;
 
-exports[`playground for case toy assertion 1`] = `"case"`;
-
-exports[`repTemplate if binary rep found, return object with
+exports[`repTemplate if binary rep found, return object with 
               left hand expression, parsed as template, as match.value.template and
               right hand expression, parsed as template, as match.value.separator 1`] = `
 Object {
@@ -198,7 +202,10 @@ Object {
     },
     "template": Object {
       "type": "reg",
-      "value": "a",
+      "value": Object {
+        "ignoreCase": false,
+        "pattern": "a",
+      },
     },
   },
 }
@@ -215,7 +222,10 @@ Object {
       },
       Object {
         "type": "reg",
-        "value": "fever",
+        "value": Object {
+          "ignoreCase": false,
+          "pattern": "fever",
+        },
       },
     ],
   },
@@ -256,7 +266,10 @@ Object {
       "value": Array [
         Object {
           "type": "reg",
-          "value": "go(nna|ing to) ",
+          "value": Object {
+            "ignoreCase": false,
+            "pattern": "go(nna|ing to) ",
+          },
         },
         Object {
           "type": "text",
@@ -283,8 +296,6 @@ Object {
   ],
 }
 `;
-
-exports[`toy assertion for case 1`] = `"case"`;
 
 exports[`unionTemplate if binary union found, return array of syntax results as match.value 1`] = `
 Array [
@@ -316,7 +327,10 @@ Object {
         },
         Object {
           "type": "reg",
-          "value": "read",
+          "value": Object {
+            "ignoreCase": false,
+            "pattern": "read",
+          },
         },
       ],
     },

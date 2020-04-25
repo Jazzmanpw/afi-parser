@@ -24,11 +24,11 @@ export function textTemplate(source: string, pos: number = 0): ParserResultType<
 }
 
 const slash = text('/');
-const regTemplateParser = seq(slash, reg('(\\\\.|[^/\\\\])+'), slash);
+const regTemplateParser = seq(slash, reg('(\\\\.|[^/\\\\])+'), slash, reg('i?'));
 export function regTemplate(source: string, pos: number = 0): ParserResultType<RegResultType> {
   const [result, newPos] = regTemplateParser(source, pos);
   if (result) {
-    return [{ type: 'reg', value: result[1] }, newPos];
+    return [{ type: 'reg', value: { pattern: result[1], ignoreCase: !!result[3][0] } }, newPos];
   }
   return [null, pos];
 }

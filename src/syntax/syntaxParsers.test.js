@@ -78,19 +78,35 @@ describe('regTemplate', () => {
     expect(regTemplate('/(some|any)? ?regex/')[0].type).toBe('reg');
   });
 
-  test('text in slashes returns string between them as match.value', () => {
-    expect(regTemplate('/(some|any)? ?regex/')[0].value).toBe('(some|any)? ?regex');
+  test('text in slashes returns string between them as match.value.pattern', () => {
+    expect(regTemplate('/(some|any)? ?regex/')[0].value.pattern).toBe('(some|any)? ?regex');
   });
 
   test('regex escaping with backslash', () => {
-    expect(regTemplate('/reg w\\/slash&\\$ymbols\\./')[0].value).toBe('reg w\\/slash&\\$ymbols\\.');
+    expect(regTemplate('/reg w\\/slash&\\$ymbols\\./')[0].value.pattern).toBe('reg w\\/slash&\\$ymbols\\.');
+  });
+
+  test('accept i flag following immediately after the closing slash', () => {
+    expect(regTemplate('/any case/i')[0].value.ignoreCase).toBe(true);
+  });
+
+  test.each(['/no flag/', '/space before flag/ i', '/flag in capital/I', '/another flag/s'])(
+    'if there\'s no "i", following immediately after the closing slash, return match.value.ignoreCase as false',
+    source => {
+      expect(regTemplate(source)[0].value.ignoreCase).toBe(false);
+    },
+  );
+
+  test.each(['g', 'm', 's', 'u', 'y'])('don\'t match %s flag following immediately after the closing slash', flag => {
+    const result = regTemplate(`/ignored flag/${flag}`);
+    expect(result[1]).toBe(14);
   });
 
   test('positive position incremented to be after the last slash', () => {
     expect(regTemplate('regular: /expressions?/', 9)[1]).toBe(23);
   });
 
-  test('empty reg template is not parser', () => {
+  test('empty reg template is not parsed', () => {
     expect(regTemplate('//')[0]).toBe(null);
   });
 
@@ -244,7 +260,7 @@ describe('group', () => {
 
   test.each([
     ['text', '(\'test (passes)\')', 'test (passes)'],
-    ['reg', '(/passes (too|) (=\\))?/)', 'passes (too|) (=\\))?'],
+    ['reg', '(/passes (too|) (=\\))?/)', { pattern: 'passes (too|) (=\\))?', ignoreCase: false }],
   ])('parentheses need not to be escaped inside of %sTemplate', (type, source, value) => {
     const result = group(source);
     expect(result[0]).toEqual({ type: 'group', value: { type, value } });
@@ -286,10 +302,10 @@ describe('rule', () => {
     expect(result[0].expression).toEqual({
       type: 'seq',
       value: [
-        { type: 'reg', value: 'this' },
-        { type: 'reg', value: 'is' },
+        { type: 'reg', value: { pattern: 'this', ignoreCase: false } },
+        { type: 'reg', value: { pattern: 'is', ignoreCase: false } },
         { type: 'text', value: 'a' },
-        { type: 'reg', value: 'sequence' },
+        { type: 'reg', value: { pattern: 'sequence', ignoreCase: false } },
       ],
     });
   });
@@ -301,8 +317,8 @@ describe('rule', () => {
       value: [
         { type: 'text', value: 'union' },
         { type: 'text', value: 'values' },
-        { type: 'reg', value: 'any' },
-        { type: 'reg', value: 'set' },
+        { type: 'reg', value: { pattern: 'any', ignoreCase: false } },
+        { type: 'reg', value: { pattern: 'set', ignoreCase: false } },
       ],
     });
   });

@@ -1,6 +1,6 @@
 {
   "name": "afi-parser",
-  "version": "0.5.2",
+  "version": "0.6.0",
   "main": "index.js",
   "license": "MIT",
   "devDependencies": {
