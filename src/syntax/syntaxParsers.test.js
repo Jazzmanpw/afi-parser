@@ -4,6 +4,7 @@ const {
   name,
   regTemplate,
   repTemplate,
+  ruleRef,
   seqTemplate,
   textTemplate,
   unionTemplate,
@@ -95,6 +96,22 @@ describe('regTemplate', () => {
 
   test('if template is not closed with the second slash, return null match', () => {
     expect(regTemplate('/close me')[0]).toBe(null);
+  });
+});
+
+describe('ruleRef', () => {
+  const result = ruleRef('/reg/ ruleName', 6);
+
+  test('if name found, return type: \'rule\'', () => {
+    expect(result[0].type).toBe('rule');
+  });
+
+  test('if name found, return it as match.value', () => {
+    expect(result[0].value).toBe('ruleName');
+  });
+
+  test('positive position incremented to be after the name', () => {
+    expect(result[1]).toBe(14);
   });
 });
 

@@ -6,7 +6,7 @@ import type {
   ExpressionType,
   GroupResultType,
   RegResultType,
-  RepResultType,
+  RepResultType, RuleRefResultType,
   RuleResultType,
   SeqResultType,
   TextResultType,
@@ -33,7 +33,15 @@ export function regTemplate(source: string, pos: number = 0): ParserResultType<R
   return [null, pos];
 }
 
-const atomicTemplate = union(textTemplate, regTemplate, group);
+export function ruleRef(source: string, pos: number = 0): ParserResultType<RuleRefResultType> {
+  const [result, newPos] = name(source, pos);
+  if (result) {
+    return [{ type: 'rule', value: result }, newPos];
+  }
+  return [null, pos];
+}
+
+const atomicTemplate = union(textTemplate, regTemplate, ruleRef, group);
 const repItemTemplate = union(repTemplate, atomicTemplate);
 const seqItemTemplate = union(seqTemplate, repItemTemplate);
 const unionItemTemplate = union(unionTemplate, seqItemTemplate);

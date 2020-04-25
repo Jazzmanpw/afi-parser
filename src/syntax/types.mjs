@@ -7,7 +7,8 @@ interface ISyntaxResult<T: string, V> {
 
 export type TextResultType = ISyntaxResult<'text', string>
 export type RegResultType = ISyntaxResult<'reg', string>
-export type AtomicParserResultType = TextResultType | RegResultType
+export type RuleRefResultType = ISyntaxResult<'rule', string>
+export type AtomicParserResultType = TextResultType | RegResultType | RuleRefResultType | GroupResultType
 
 type RepValueType = { template: RepItemType, separator: RepItemType }
 export type RepResultType = ISyntaxResult<'rep', RepValueType>
