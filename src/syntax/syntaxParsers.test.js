@@ -1,3 +1,5 @@
+import { GROUP, REG, REP, RULE, SEQ, TEXT, UNION } from './templateTypes';
+
 const {
   default: rule,
   group,
@@ -48,8 +50,8 @@ describe('name', () => {
 });
 
 describe('textTemplate', () => {
-  test('text in single quotes parsed into `type: text`', () => {
-    expect(textTemplate('\'some template\'')[0].type).toBe('text');
+  test('text in single quotes parsed into type: TEXT', () => {
+    expect(textTemplate('\'some template\'')[0].type).toBe(TEXT);
   });
 
   test('text in single quotes returns string in the quotes as match.value', () => {
@@ -74,8 +76,8 @@ describe('textTemplate', () => {
 });
 
 describe('regTemplate', () => {
-  test('text in slashes parsed into `type: reg`', () => {
-    expect(regTemplate('/(some|any)? ?regex/')[0].type).toBe('reg');
+  test('text in slashes parsed into type: REG', () => {
+    expect(regTemplate('/(some|any)? ?regex/')[0].type).toBe(REG);
   });
 
   test('text in slashes returns string between them as match.value.pattern', () => {
@@ -118,8 +120,8 @@ describe('regTemplate', () => {
 describe('ruleRef', () => {
   const result = ruleRef('/reg/ ruleName', 6);
 
-  test('if name found, return type: \'rule\'', () => {
-    expect(result[0].type).toBe('rule');
+  test('if name found, return type: RULE', () => {
+    expect(result[0].type).toBe(RULE);
   });
 
   test('if name found, return it as match.value', () => {
@@ -132,12 +134,12 @@ describe('ruleRef', () => {
 });
 
 describe('repTemplate', () => {
-  test('if atomic templates joined with hat, return `type: rep`', () => {
+  test('if atomic templates joined with hat, return type: REP', () => {
     const result = repTemplate('\'ha\'^\'-\'');
-    expect(result[0].type).toBe('rep');
+    expect(result[0].type).toBe(REP);
   });
 
-  test(`if binary rep found, return object with 
+  test(`if binary rep found, return object with
               left hand expression, parsed as template, as match.value.template and
               right hand expression, parsed as template, as match.value.separator`, () => {
     const result = repTemplate('\'a\'^\'b\'');
@@ -161,9 +163,9 @@ describe('repTemplate', () => {
 });
 
 describe('seqTemplate', () => {
-  test('if atomic templates joined with spaces found, return `type: seq`', () => {
+  test('if atomic templates joined with spaces found, return type: SEQ', () => {
     const result = seqTemplate('\'parse\' \'it\'');
-    expect(result[0].type).toBe('seq');
+    expect(result[0].type).toBe(SEQ);
   });
 
   test('if binary sequence found, return array of syntax results as match.value', () => {
@@ -192,8 +194,8 @@ describe('seqTemplate', () => {
 });
 
 describe('unionTemplate', () => {
-  test('if atomic templates joined with pipe, return `type: union`', () => {
-    expect(unionTemplate('\'this\'|\'that\'')[0].type).toBe('union');
+  test('if atomic templates joined with pipe, return type: UNION', () => {
+    expect(unionTemplate('\'this\'|\'that\'')[0].type).toBe(UNION);
   });
 
   test('if binary union found, return array of syntax results as match.value', () => {
@@ -229,8 +231,8 @@ describe('group', () => {
       result = null;
     });
 
-    test('return `type: group`', () => {
-      expect(result[0].type).toBe('group');
+    test('return type: GROUP', () => {
+      expect(result[0].type).toBe(GROUP);
     });
 
     test('return inner template result as match.value', () => {
@@ -263,7 +265,7 @@ describe('group', () => {
     ['reg', '(/passes (too|) (=\\))?/)', { pattern: 'passes (too|) (=\\))?', ignoreCase: false }],
   ])('parentheses need not to be escaped inside of %sTemplate', (type, source, value) => {
     const result = group(source);
-    expect(result[0]).toEqual({ type: 'group', value: { type, value } });
+    expect(result[0]).toEqual({ type: GROUP, value: { type, value } });
   });
 
   test('empty group template is not allowed', () => {
@@ -300,12 +302,12 @@ describe('rule', () => {
   test('n sequences in a row return as one seq with array of length n as match.value', () => {
     const result = rule('name: /this/ /is/ \'a\' /sequence/');
     expect(result[0].expression).toEqual({
-      type: 'seq',
+      type: SEQ,
       value: [
-        { type: 'reg', value: { pattern: 'this', ignoreCase: false } },
-        { type: 'reg', value: { pattern: 'is', ignoreCase: false } },
-        { type: 'text', value: 'a' },
-        { type: 'reg', value: { pattern: 'sequence', ignoreCase: false } },
+        { type: REG, value: { pattern: 'this', ignoreCase: false } },
+        { type: REG, value: { pattern: 'is', ignoreCase: false } },
+        { type: TEXT, value: 'a' },
+        { type: REG, value: { pattern: 'sequence', ignoreCase: false } },
       ],
     });
   });
@@ -313,12 +315,12 @@ describe('rule', () => {
   test('n unions in a row return as one union with array of length n as match.value', () => {
     const result = rule('name: \'union\' | \'values\' | /any/ | /set/');
     expect(result[0].expression).toEqual({
-      type: 'union',
+      type: UNION,
       value: [
-        { type: 'text', value: 'union' },
-        { type: 'text', value: 'values' },
-        { type: 'reg', value: { pattern: 'any', ignoreCase: false } },
-        { type: 'reg', value: { pattern: 'set', ignoreCase: false } },
+        { type: TEXT, value: 'union' },
+        { type: TEXT, value: 'values' },
+        { type: REG, value: { pattern: 'any', ignoreCase: false } },
+        { type: REG, value: { pattern: 'set', ignoreCase: false } },
       ],
     });
   });
@@ -326,8 +328,8 @@ describe('rule', () => {
   test('group match value replaces the group', () => {
     const result = rule('name: (\'nested\' (\'group\'))');
     expect(result[0].expression).toEqual({
-      type: 'seq',
-      value: [{ type: 'text', value: 'nested' }, { type: 'text', value: 'group' }],
+      type: SEQ,
+      value: [{ type: TEXT, value: 'nested' }, { type: TEXT, value: 'group' }],
     });
   });
 });

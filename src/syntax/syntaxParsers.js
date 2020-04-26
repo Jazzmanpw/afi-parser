@@ -1,5 +1,6 @@
 // @flow
 import { reg, seq, text, union } from '../basicParsers';
+import { GROUP, REG, REP, RULE, SEQ, TEXT, UNION } from './templateTypes';
 
 import type { ParserResultType } from '../basicParsers';
 import type {
@@ -18,7 +19,7 @@ const textTemplateParser = seq(quote, reg('(\\\\.|[^\'\\\\])+'), quote);
 export function textTemplate(source: string, pos: number = 0): ParserResultType<TextResultType> {
   const [result, newPos] = textTemplateParser(source, pos);
   if (result) {
-    return [{ type: 'text', value: result[1] }, newPos];
+    return [{ type: TEXT, value: result[1] }, newPos];
   }
   return [null, pos];
 }
@@ -28,7 +29,7 @@ const regTemplateParser = seq(slash, reg('(\\\\.|[^/\\\\])+'), slash, reg('i?'))
 export function regTemplate(source: string, pos: number = 0): ParserResultType<RegResultType> {
   const [result, newPos] = regTemplateParser(source, pos);
   if (result) {
-    return [{ type: 'reg', value: { pattern: result[1], ignoreCase: !!result[3][0] } }, newPos];
+    return [{ type: REG, value: { pattern: result[1], ignoreCase: !!result[3][0] } }, newPos];
   }
   return [null, pos];
 }
@@ -36,7 +37,7 @@ export function regTemplate(source: string, pos: number = 0): ParserResultType<R
 export function ruleRef(source: string, pos: number = 0): ParserResultType<RuleRefResultType> {
   const [result, newPos] = name(source, pos);
   if (result) {
-    return [{ type: 'rule', value: result }, newPos];
+    return [{ type: RULE, value: result }, newPos];
   }
   return [null, pos];
 }
@@ -50,7 +51,7 @@ const repTemplateParser = seq(atomicTemplate, wrappedWithOptionalSpaces('\\^'), 
 export function repTemplate(source: string, pos: number = 0): ParserResultType<RepResultType> {
   const [result, newPos] = repTemplateParser(source, pos);
   if (result) {
-    return [{ type: 'rep', value: { template: result[0], separator: result[2] } }, newPos];
+    return [{ type: REP, value: { template: result[0], separator: result[2] } }, newPos];
   }
   return [null, pos];
 }
@@ -59,7 +60,7 @@ const seqTemplateParser = seq(repItemTemplate, wrappedWithOptionalSpaces('\\s'),
 export function seqTemplate(source: string, pos: number = 0): ParserResultType<SeqResultType> {
   const [result, newPos] = seqTemplateParser(source, pos);
   if (result) {
-    return [{ type: 'seq', value: [result[0], result[2]] }, newPos];
+    return [{ type: SEQ, value: [result[0], result[2]] }, newPos];
   }
   return [null, pos];
 }
@@ -68,7 +69,7 @@ const unionTemplateParser = seq(seqItemTemplate, wrappedWithOptionalSpaces('\\|'
 export function unionTemplate(source: string, pos: number = 0): ParserResultType<UnionResultType> {
   const [result, newPos] = unionTemplateParser(source, pos);
   if (result) {
-    return [{ type: 'union', value: [result[0], result[2]] }, newPos];
+    return [{ type: UNION, value: [result[0], result[2]] }, newPos];
   }
   return [null, pos];
 }
@@ -81,7 +82,7 @@ const groupParser = seq(reg('\\(\\s*'), unionItemTemplate, reg('\\s*\\)'));
 export function group(source: string, pos: number = 0): ParserResultType<GroupResultType> {
   const [result, newPos] = groupParser(source, pos);
   if (result) {
-    return [{ type: 'group', value: result[1] }, newPos];
+    return [{ type: GROUP, value: result[1] }, newPos];
   }
   return [null, pos];
 }
@@ -106,17 +107,18 @@ export default function rule(source: string, pos: number = 0): ParserResultType<
 
 function normalizeTree({ type, value }: ExpressionType): ExpressionType {
   switch (type) {
-    case 'text':
-    case 'reg':
+    case TEXT:
+    case REG:
+    case RULE:
       return { type, value };
-    case 'group':
+    case GROUP:
       return normalizeTree(value);
-    case 'seq':
-    case 'union': {
+    case SEQ:
+    case UNION: {
       const normValue = flatNestedBinaries(type, value);
       return { type, value: normValue.map(normalizeTree) };
     }
-    case 'rep': {
+    case REP: {
       const { template, separator } = value;
       return { type, value: { template: normalizeTree(template), separator: normalizeTree(separator) } };
     }

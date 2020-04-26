@@ -1,27 +1,28 @@
 // @flow
+import { GROUP, REG, REP, RULE, SEQ, TEXT, UNION } from './templateTypes';
 
 interface ISyntaxResult<T: string, V> {
   type: T,
   value: V,
 }
 
-export type TextResultType = ISyntaxResult<'text', string>
-export type RegResultType = ISyntaxResult<'reg', string>
-export type RuleRefResultType = ISyntaxResult<'rule', string>
+export type TextResultType = ISyntaxResult<TEXT, string>
+export type RegResultType = ISyntaxResult<REG, string>
+export type RuleRefResultType = ISyntaxResult<RULE, string>
 export type AtomicParserResultType = TextResultType | RegResultType | RuleRefResultType | GroupResultType
 
 type RepValueType = { template: RepItemType, separator: RepItemType }
-export type RepResultType = ISyntaxResult<'rep', RepValueType>
+export type RepResultType = ISyntaxResult<REP, RepValueType>
 type RepItemType = AtomicParserResultType | RepResultType
 
-export type SeqResultType = ISyntaxResult<'seq', Array<SeqItemType>>
+export type SeqResultType = ISyntaxResult<SEQ, Array<SeqItemType>>
 type SeqItemType = RepItemType | SeqResultType
 
-export type UnionResultType = ISyntaxResult<'union', Array<UnionItemType>>
+export type UnionResultType = ISyntaxResult<UNION, Array<UnionItemType>>
 type UnionItemType = SeqItemType | UnionResultType
 
 export type ExpressionType = UnionItemType
-export type GroupResultType = ISyntaxResult<'group', ExpressionType>
+export type GroupResultType = ISyntaxResult<GROUP, ExpressionType>
 
 export type RuleResultType = {
   name: string,

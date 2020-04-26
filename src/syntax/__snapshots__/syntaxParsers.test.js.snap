@@ -155,7 +155,7 @@ Object {
 }
 `;
 
-exports[`repTemplate if binary rep found, return object with 
+exports[`repTemplate if binary rep found, return object with
               left hand expression, parsed as template, as match.value.template and
               right hand expression, parsed as template, as match.value.separator 1`] = `
 Object {
