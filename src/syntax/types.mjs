@@ -36,3 +36,7 @@ export type RuleResultType = {
   name: string,
   expression: ExpressionType,
 }
+
+export type CommentResultType = {
+  comment: true,
+}
