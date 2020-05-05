@@ -25,11 +25,16 @@ export function textTemplate(source: string, pos: number = 0): ParserResultType<
 }
 
 const slash = text('/');
-const regTemplateParser = seq(slash, reg('(\\\\.|[^/\\\\])+'), slash, reg('i?'));
+const regTemplateParser = seq(slash, reg('(\\\\.|[^/\\\\])+'), slash, reg('(?:([is])(?!.*\\1))*'));
 export function regTemplate(source: string, pos: number = 0): ParserResultType<RegResultType> {
   const [result, newPos] = regTemplateParser(source, pos);
   if (result) {
-    return [{ type: REG, value: { pattern: result[1], ignoreCase: !!result[3][0] } }, newPos];
+    const flags = result[3];
+    const ignoreCase = flags.includes('i');
+    // the name `dotAll` was selected according to this property of RegExp prototype
+    // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RegExp/dotAll
+    const dotAll = flags.includes('s');
+    return [{ type: REG, value: { pattern: result[1], ignoreCase, dotAll } }, newPos];
   }
   return [null, pos];
 }

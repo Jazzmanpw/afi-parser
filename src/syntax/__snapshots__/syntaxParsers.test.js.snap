@@ -9,6 +9,7 @@ Object {
       Object {
         "type": "reg",
         "value": Object {
+          "dotAll": false,
           "ignoreCase": false,
           "pattern": "a",
         },
@@ -35,6 +36,7 @@ exports[`group if regTemplate wrapped in parentheses found return inner template
 Object {
   "type": "reg",
   "value": Object {
+    "dotAll": false,
     "ignoreCase": false,
     "pattern": "group",
   },
@@ -203,6 +205,7 @@ Object {
     "template": Object {
       "type": "reg",
       "value": Object {
+        "dotAll": false,
         "ignoreCase": false,
         "pattern": "a",
       },
@@ -223,6 +226,7 @@ Object {
       Object {
         "type": "reg",
         "value": Object {
+          "dotAll": false,
           "ignoreCase": false,
           "pattern": "fever",
         },
@@ -267,6 +271,7 @@ Object {
         Object {
           "type": "reg",
           "value": Object {
+            "dotAll": false,
             "ignoreCase": false,
             "pattern": "go(nna|ing to) ",
           },
@@ -328,6 +333,7 @@ Object {
         Object {
           "type": "reg",
           "value": Object {
+            "dotAll": false,
             "ignoreCase": false,
             "pattern": "read",
           },

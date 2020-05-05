@@ -7,8 +7,16 @@ interface ISyntaxResult<T: string, V> {
 }
 
 export type TextResultType = ISyntaxResult<TEXT, string>
-export type RegResultType = ISyntaxResult<REG, string>
+
+type RegValueType = {
+  pattern: string,
+  ignoreCase: boolean,
+  dotAll: boolean,
+}
+export type RegResultType = ISyntaxResult<REG, RegValueType>
+
 export type RuleRefResultType = ISyntaxResult<RULE, string>
+
 export type AtomicParserResultType = TextResultType | RegResultType | RuleRefResultType | GroupResultType
 
 type RepValueType = { template: RepItemType, separator: RepItemType }

@@ -99,7 +99,31 @@ describe('regTemplate', () => {
     },
   );
 
-  test.each(['g', 'm', 's', 'u', 'y'])('don\'t match %s flag following immediately after the closing slash', flag => {
+  test('accept s flag following immediately after the closing slash', () => {
+    expect(regTemplate('/dot it all/s')[0].value.dotAll).toBe(true);
+  });
+
+  test.each(['/no flag/', '/space before flag/ s', '/flag in capital/S', '/another flag/i'])(
+    'if there\'s no "s", following immediately after the closing slash, return match.value.dotAll as false',
+    source => {
+      expect(regTemplate(source)[0].value.dotAll).toBe(false);
+    },
+  );
+
+  test.each(['is', 'si'])('accept s and i flags in any order following immediately after the closing slash', flags => {
+    const { ignoreCase, dotAll } = regTemplate(`/both flags/${flags}`)[0].value;
+    expect(ignoreCase).toBe(true);
+    expect(dotAll).toBe(true);
+  });
+
+  test('if one of accepted flags is repeated more than one time, don\'t match flags at all', () => {
+    expect(regTemplate('/broken/isi')).toEqual([
+      { type: REG, value: { pattern: 'broken', ignoreCase: false, dotAll: false } },
+      8,
+    ])
+  });
+
+  test.each(['g', 'm', 'u', 'y'])('don\'t match %s flag following immediately after the closing slash', flag => {
     const result = regTemplate(`/ignored flag/${flag}`);
     expect(result[1]).toBe(14);
   });
@@ -262,7 +286,7 @@ describe('group', () => {
 
   test.each([
     ['text', '(\'test (passes)\')', 'test (passes)'],
-    ['reg', '(/passes (too|) (=\\))?/)', { pattern: 'passes (too|) (=\\))?', ignoreCase: false }],
+    ['reg', '(/passes (too|) (=\\))?/)', { pattern: 'passes (too|) (=\\))?', ignoreCase: false, dotAll: false }],
   ])('parentheses need not to be escaped inside of %sTemplate', (type, source, value) => {
     const result = group(source);
     expect(result[0]).toEqual({ type: GROUP, value: { type, value } });
@@ -304,10 +328,10 @@ describe('rule', () => {
     expect(result[0].expression).toEqual({
       type: SEQ,
       value: [
-        { type: REG, value: { pattern: 'this', ignoreCase: false } },
-        { type: REG, value: { pattern: 'is', ignoreCase: false } },
+        { type: REG, value: { pattern: 'this', ignoreCase: false, dotAll: false } },
+        { type: REG, value: { pattern: 'is', ignoreCase: false, dotAll: false } },
         { type: TEXT, value: 'a' },
-        { type: REG, value: { pattern: 'sequence', ignoreCase: false } },
+        { type: REG, value: { pattern: 'sequence', ignoreCase: false, dotAll: false } },
       ],
     });
   });
@@ -319,8 +343,8 @@ describe('rule', () => {
       value: [
         { type: TEXT, value: 'union' },
         { type: TEXT, value: 'values' },
-        { type: REG, value: { pattern: 'any', ignoreCase: false } },
-        { type: REG, value: { pattern: 'set', ignoreCase: false } },
+        { type: REG, value: { pattern: 'any', ignoreCase: false, dotAll: false } },
+        { type: REG, value: { pattern: 'set', ignoreCase: false, dotAll: false } },
       ],
     });
   });
