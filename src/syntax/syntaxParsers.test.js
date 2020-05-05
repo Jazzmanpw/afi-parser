@@ -299,7 +299,7 @@ describe('rule', () => {
     expect(rule('broken: /close me')[0]).toBe(null);
   });
 
-  test('n sequences in a row return as one seq with array of length n as match.value', () => {
+  test('n sequences in a row returned as one seq with array of length n as match.value', () => {
     const result = rule('name: /this/ /is/ \'a\' /sequence/');
     expect(result[0].expression).toEqual({
       type: SEQ,
@@ -312,7 +312,7 @@ describe('rule', () => {
     });
   });
 
-  test('n unions in a row return as one union with array of length n as match.value', () => {
+  test('n unions in a row returned as one union with array of length n as match.value', () => {
     const result = rule('name: \'union\' | \'values\' | /any/ | /set/');
     expect(result[0].expression).toEqual({
       type: UNION,
