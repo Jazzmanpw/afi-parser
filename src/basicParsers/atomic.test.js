@@ -33,10 +33,6 @@ describe('test', () => {
 describe('reg', () => {
   const parseReg = reg('ba[rz]');
   const parseVariousLengthReg = reg('\\s+');
-  const parseCaseSensitiveReg = reg('[GMT]B', false);
-  const parseCaseInsensitiveReg = reg('fo{2}', true);
-  const parseAnotherCaseInsensitiveReg = reg('russia', 'I\'m truthy');
-  const parseMatchingEmptyStringReg = reg('o?');
 
   test('if reg matches, return matched string', () => {
     expect(parseReg('barby')[0]).toBe('bar');
@@ -44,17 +40,26 @@ describe('reg', () => {
   });
 
   test('if reg matches an empty string, don\'t fail match', () => {
-    expect(parseMatchingEmptyStringReg('done')[0]).toBe('');
+    expect(reg('o?')('done')[0]).toBe('');
   });
 
-  test('if second argument is falsy, regexp is case sensitive', () => {
-    expect(parseReg('Barbara')[0]).toBe(null);
-    expect(parseCaseSensitiveReg('10gb', 2)[0]).toBe(null);
-  });
+  describe.each([
+    ['ignoreCase', 'is case insensitive', 'is case sensitive', '10[GMT]B', '10gb'],
+    ['dotAll', 'doesn\'t match "\\n" with dot', 'matches "\\n" with dot', 'abra.cadabra', 'abra\ncadabra'],
+  ])('%s flag', (key, hasNoFlag, hasFlag, pattern, source) => {
+    test(`if reg called with one argument, regexp ${hasNoFlag}`, () => {
+      expect(reg(pattern)(source)[0]).toBe(null);
+    });
 
-  test('if second argument is truthy, regexp is case insensitive', () => {
-    expect(parseCaseInsensitiveReg('Football')[0]).toBe('Foo');
-    expect(parseAnotherCaseInsensitiveReg('RuSsIaN StYlE')[0]).toBe('RuSsIa');
+    test.each(
+      [false, null, undefined, 0, '', NaN]
+    )(`if reg called with second argument with falsy '${key}' property, regexp ${hasNoFlag}`, value => {
+      expect(reg(pattern, { [key]: value })(source)[0]).toBe(null);
+    });
+
+    test(`if reg called with second argument with '${key}: true', regexp ${hasFlag}`, () => {
+      expect(reg(pattern, { [key]: true })(source)[0]).toBe(source);
+    });
   });
 
   test('if reg matches, increment position by its length', () => {

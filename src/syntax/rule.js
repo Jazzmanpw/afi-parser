@@ -31,8 +31,6 @@ export function regTemplate(source: string, pos: number = 0): ParserResultType<R
   if (result) {
     const flags = result[3];
     const ignoreCase = flags.includes('i');
-    // the name `dotAll` was selected according to this property of RegExp prototype
-    // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RegExp/dotAll
     const dotAll = flags.includes('s');
     return [{ type: REG, value: { pattern: result[1], ignoreCase, dotAll } }, newPos];
   }
