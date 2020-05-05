@@ -10,7 +10,7 @@ const {
   seqTemplate,
   textTemplate,
   unionTemplate,
-} = require('./syntaxParsers');
+} = require('./rule');
 
 describe('name', () => {
   test('match a name starting with a letter', () => {
