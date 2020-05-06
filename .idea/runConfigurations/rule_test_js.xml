@@ -1,12 +1,12 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="syntaxParsers.test.js" type="JavaScriptTestRunnerJest" nameIsGenerated="true">
+  <configuration default="false" name="rule.test.js" type="JavaScriptTestRunnerJest" nameIsGenerated="true">
     <node-interpreter value="project" />
     <node-options value="" />
     <jest-package value="$PROJECT_DIR$/node_modules/jest" />
     <working-dir value="$PROJECT_DIR$" />
     <envs />
     <scope-kind value="TEST_FILE" />
-    <test-file value="$PROJECT_DIR$/src/syntax/syntaxParsers.test.js" />
+    <test-file value="$PROJECT_DIR$/src/syntax/rule.test.js" />
     <method v="2" />
   </configuration>
 </component>
