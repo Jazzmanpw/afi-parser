@@ -214,7 +214,7 @@ Object {
 }
 `;
 
-exports[`rule allow multiple spaces after the semicolon 1`] = `
+exports[`rule multiple spaces after the semicolon are allowed 1`] = `
 Object {
   "expression": Object {
     "type": "seq",

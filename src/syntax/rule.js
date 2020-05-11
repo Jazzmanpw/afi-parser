@@ -59,7 +59,7 @@ export function repTemplate(source: string, pos: number = 0): ParserResultType<R
   return [null, pos];
 }
 
-const seqTemplateParser = seq(repItemTemplate, wrappedWithOptionalSpaces('\\s'), seqItemTemplate);
+const seqTemplateParser = seq(repItemTemplate, wrappedWithOptionalSpaces(' '), seqItemTemplate);
 export function seqTemplate(source: string, pos: number = 0): ParserResultType<SeqResultType> {
   const [result, newPos] = seqTemplateParser(source, pos);
   if (result) {
@@ -78,10 +78,10 @@ export function unionTemplate(source: string, pos: number = 0): ParserResultType
 }
 
 function wrappedWithOptionalSpaces(c) {
-  return reg(`\\s*${c}\\s*`);
+  return reg(` *${c} *`);
 }
 
-const groupParser = seq(reg('\\(\\s*'), unionItemTemplate, reg('\\s*\\)'));
+const groupParser = seq(reg('\\( *'), unionItemTemplate, reg(' *\\)'));
 export function group(source: string, pos: number = 0): ParserResultType<GroupResultType> {
   const [result, newPos] = groupParser(source, pos);
   if (result) {
@@ -99,7 +99,7 @@ export function name(source: string, pos: number = 0): ParserResultType<string> 
   return [null, pos];
 }
 
-const ruleParser = seq(name, reg(':\\s*'), unionItemTemplate);
+const ruleParser = seq(name, reg(': *'), unionItemTemplate);
 export default function rule(source: string, pos: number = 0): ParserResultType<RuleResultType> {
   const [result, newPos] = ruleParser(source, pos);
   if (result) {

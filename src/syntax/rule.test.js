@@ -180,6 +180,11 @@ describe('repTemplate', () => {
     expect(result[0]).toMatchSnapshot();
   });
 
+  test('newlines around hat are not allowed', () => {
+    const result = repTemplate('/a/ ^\n  \'b\'');
+    expect(result[0]).toBe(null);
+  });
+
   test('positive position incremented to be after the last child template', () => {
     const result = repTemplate('repeat: /[hH]o/ ^ \'!\'', 8);
     expect(result[1]).toBe(21);
@@ -215,6 +220,10 @@ describe('seqTemplate', () => {
   test('zero-spaces separator is not allowed', () => {
     expect(seqTemplate('\'cannot\'\'parse\'')[0]).toBe(null);
   });
+
+  test.each(['\r', '\n', '\t', '\f', '\v'])('only simple space allowed as separator', notSpace => {
+    expect(seqTemplate(`/a/${notSpace}/b/`)[0]).toBe(null);
+  })
 });
 
 describe('unionTemplate', () => {
@@ -232,6 +241,10 @@ describe('unionTemplate', () => {
 
   test('optional spaces around pipe are allowed', () => {
     expect(unionTemplate('\'connecting\'  |   \'people\'')[0]).toMatchSnapshot();
+  });
+
+  test('newlines around pipe are not allowed', () => {
+    expect(unionTemplate('\'connecting\' |\n  \'people\'')[0]).toBe(null);
   });
 
   test('positive position incremented to be after the last child template', () => {
@@ -279,6 +292,11 @@ describe('group', () => {
     expect(result[0]).toMatchSnapshot();
   });
 
+  test('newlines inside of parentheses are not allowed', () => {
+    const result = group('(\n  \'I \'  \'love \'  \'spaces!!!\'\n)');
+    expect(result[0]).toBe(null);
+  });
+
   test('positive position incremented to be after the last parenthesis', () => {
     const result = group('littleGroup: (/little group/)', 13);
     expect(result[1]).toBe(29);
@@ -311,8 +329,12 @@ describe('rule', () => {
     expect(result[0].expression).toMatchSnapshot();
   });
 
-  test('allow multiple spaces after the semicolon', () => {
+  test('multiple spaces after the semicolon are allowed', () => {
     expect(rule('name:    \'space\' /fever/')[0]).toMatchSnapshot();
+  });
+
+  test('newlines after the semicolon are not allowed', () => {
+    expect(rule('name:\n  \'space\' /fever/')[0]).toBe(null);
   });
 
   test('if name parsing fails, return null match', () => {
